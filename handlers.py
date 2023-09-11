@@ -5,7 +5,9 @@ from main import logging
 from states import Questionnaire
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from db import save_user_data, get_user_data
 from variables import get_recommended_baas
+from variables import calculate_recommendations
 
 
 @dp.message_handler(lambda message: message.text == "Начать", state="*")
@@ -351,3 +353,12 @@ async def process_final_question(
     await callback_query.message.answer(
         f"Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: {', '.join(recommended_baas)}"
     )
+
+
+async def some_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    user_data = await state.get_data()
+    recommended_baas = calculate_recommendations(user_data)
+    async with dp["db_pool"].acquire() as conn:
+        await save_user_data(
+            conn, callback_query.from_user.id, user_data, recommended_baas
+        )
