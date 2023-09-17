@@ -73,14 +73,7 @@ async def handle_age(callback_query: types.CallbackQuery, state: FSMContext):
 )
 async def veg_consumption(message: types.Message, state: FSMContext):
     markup = InlineKeyboardMarkup()
-    markup.row(
-        InlineKeyboardButton("Да, я ем много фруктов и овощей", callback_data="veg_yes")
-    )
-    markup.row(
-        InlineKeyboardButton(
-            "Нет, я редко употребляю фрукты и овощи", callback_data="veg_no"
-        )
-    )
+    markup.row(buttons["veg_yes"], buttons["veg_no"])
     question_text = question_pack.get("q_1", "Вопрос не найден")
     await message.answer(
         question_text,
@@ -95,16 +88,7 @@ async def fatigue_feeling(callback_query: types.CallbackQuery, state: FSMContext
     await Questionnaire.FatigueFeeling.set()
     await state.update_data(veg_consumption=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(
-        InlineKeyboardButton(
-            "Да, я часто ощущаю усталость и истощение", callback_data="fatigue_yes"
-        )
-    )
-    markup.row(
-        InlineKeyboardButton(
-            "Нет, я редко испытываю усталость и истощение", callback_data="fatigue_no"
-        )
-    )
+    markup.row(buttons["fatigue_yes"], buttons["fatigue_no"])
     question_text = question_pack.get("q_2", "Вопрос не найден")
     await callback_query.message.answer(question_text, reply_markup=markup)
 
@@ -117,17 +101,7 @@ async def seafood_consumption(callback_query: types.CallbackQuery, state: FSMCon
     await Questionnaire.SeafoodConsumption.set()
     await state.update_data(fatigue_feeling=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(
-        InlineKeyboardButton(
-            "Да, я регулярно употребляю морепродукты", callback_data="seafood_yes"
-        )
-    )
-    markup.row(
-        InlineKeyboardButton(
-            "Нет, я редко или почти никогда не употребляю морепродукты",
-            callback_data="seafood_no",
-        )
-    )
+    markup.row(buttons["seafood_yes"], buttons["seafood_no"])
     question_text = question_pack.get("q_3", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -143,11 +117,9 @@ async def memory_issues(callback_query: types.CallbackQuery, state: FSMContext):
     await Questionnaire.MemoryIssues.set()
     await state.update_data(seafood_consumption=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Часто", callback_data="memory_often"))
     markup.row(
-        InlineKeyboardButton("Время от времени", callback_data="memory_sometimes")
+        buttons["memory_often"], buttons["memory_sometimes"], buttons["memory_rarely"]
     )
-    markup.row(InlineKeyboardButton("Редко", callback_data="memory_rarely"))
     question_text = question_pack.get("q_4", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -163,8 +135,7 @@ async def screen_time(callback_query: types.CallbackQuery, state: FSMContext):
     await Questionnaire.ScreenTime.set()
     await state.update_data(memory_issues=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Да, часто", callback_data="screen_often"))
-    markup.row(InlineKeyboardButton("Редко", callback_data="screen_rarely"))
+    markup.row(buttons["screen_often"], buttons["screen_rarely"])
     question_text = question_pack.get("q_5", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -180,16 +151,7 @@ async def vision_problems(callback_query: types.CallbackQuery, state: FSMContext
     await Questionnaire.VisionProblems.set()
     await state.update_data(screen_time=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(
-        InlineKeyboardButton(
-            "Да, у меня есть проблемы со зрением", callback_data="vision_yes"
-        )
-    )
-    markup.row(
-        InlineKeyboardButton(
-            "Нет, у меня нет проблем со зрением", callback_data="vision_no"
-        )
-    )
+    markup.row(buttons["vision_yes"], buttons["vision_no"])
     question_text = question_pack.get("q_6", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -204,8 +166,7 @@ async def joint_mobility(callback_query: types.CallbackQuery, state: FSMContext)
     await Questionnaire.JointMobility.set()
     await state.update_data(vision_problems=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Да", callback_data="joints_yes"))
-    markup.row(InlineKeyboardButton("Нет", callback_data="joints_no"))
+    markup.row(buttons["joints_yes"], buttons["joints_no"])
     question_text = question_pack.get("q_7", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -220,8 +181,7 @@ async def active_sport(callback_query: types.CallbackQuery, state: FSMContext):
     await Questionnaire.ActiveSport.set()
     await state.update_data(joint_mobility=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Да", callback_data="sport_yes"))
-    markup.row(InlineKeyboardButton("Нет", callback_data="sport_no"))
+    markup.row(buttons["sport_yes"], buttons["sport_no"])
     question_text = question_pack.get("q_8", "Вопрос не найден")
     await callback_query.message.answer(question_text, reply_markup=markup)
 
@@ -233,8 +193,7 @@ async def numbness(callback_query: types.CallbackQuery, state: FSMContext):
     await Questionnaire.Numbness.set()
     await state.update_data(active_sport=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Часто", callback_data="numbness_often"))
-    markup.row(InlineKeyboardButton("Редко", callback_data="numbness_rarely"))
+    markup.row(buttons["numbness_often"], buttons["numbness_rarely"])
     question_text = question_pack.get("q_9", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -250,8 +209,7 @@ async def headaches(callback_query: types.CallbackQuery, state: FSMContext):
     await Questionnaire.Headaches.set()
     await state.update_data(numbness=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Часто", callback_data="headaches_often"))
-    markup.row(InlineKeyboardButton("Редко", callback_data="headaches_rarely"))
+    markup.row(buttons["headaches_often"], buttons["headaches_rarely"])
     question_text = question_pack.get("q_10", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -267,8 +225,7 @@ async def youthfulness(callback_query: types.CallbackQuery, state: FSMContext):
     await Questionnaire.Youthfulness.set()
     await state.update_data(headaches=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Да", callback_data="youthfulness_yes"))
-    markup.row(InlineKeyboardButton("Нет", callback_data="youthfulness_no"))
+    markup.row(buttons["youthfulness_yes"], buttons["youthfulness_no"])
     question_text = question_pack.get("q_11", "Вопрос не найден")
     await callback_query.message.answer(question_text, reply_markup=markup)
 
@@ -281,8 +238,7 @@ async def detox(callback_query: types.CallbackQuery, state: FSMContext):
     await Questionnaire.Detox.set()
     await state.update_data(youthfulness=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Да", callback_data="detox_yes"))
-    markup.row(InlineKeyboardButton("Нет", callback_data="detox_no"))
+    markup.row(buttons["detox_yes"], buttons["detox_no"])
     question_text = question_pack.get("q_12", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -297,18 +253,7 @@ async def digestion(callback_query: types.CallbackQuery, state: FSMContext):
     await Questionnaire.Digestion.set()
     await state.update_data(detox=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(
-        InlineKeyboardButton(
-            "Да, у меня часто возникают проблемы с пищеварением",
-            callback_data="digestion_yes",
-        )
-    )
-    markup.row(
-        InlineKeyboardButton(
-            "Нет, у меня нет значительных проблем с пищеварением",
-            callback_data="digestion_no",
-        )
-    )
+    markup.row(buttons["digestion_yes"], buttons["digestion_no"])
     question_text = question_pack.get("q_13", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -323,8 +268,7 @@ async def reproductive_support(callback_query: types.CallbackQuery, state: FSMCo
     await Questionnaire.ReproductiveSupport.set()
     await state.update_data(digestion=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Да", callback_data="repro_support_yes"))
-    markup.row(InlineKeyboardButton("Нет", callback_data="repro_support_no"))
+    markup.row(buttons["repro_support_yes"], buttons["repro_support_no"])
     question_text = question_pack.get("q_14", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
@@ -340,8 +284,7 @@ async def beauty_enhancement(callback_query: types.CallbackQuery, state: FSMCont
     await Questionnaire.BeautyEnhancement.set()
     await state.update_data(repro_support=callback_query.data)
     markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Да", callback_data="beauty_yes"))
-    markup.row(InlineKeyboardButton("Нет", callback_data="beauty_no"))
+    markup.row(buttons["beauty_yes"], buttons["beauty_no"])
     question_text = question_pack.get("q_15", "Вопрос не найден")
     await callback_query.message.answer(
         question_text,
