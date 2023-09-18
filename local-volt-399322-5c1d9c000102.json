@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "local-volt-399322",
+  "private_key_id": "5c1d9c0001028865579eff9dbc7ef86e4a976d41",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC6XcynT5FLNpbn\nDpBOuoeMEtX5MbEOpbAd4Vfui81XIhwH/FbPdlMFcgNYj8U3aLh6nHcQ/cMVMLwB\n9QCePDrIWB4yd3y70XbrW1R34h1Xb7JiOTcJSLUXK8v8gmFJc+8+8FmZtFH7MNTM\n9ZxrBY6Ty4W6lkEoxgG427PNAEGujCGf6xqPurjY81UAqfQk21jGb9nvv/g6Ba4m\ncpUffVxd5pRu/5iZU78RmO6FpYQMN4kspY00X6dM65zxqtF9eUDYXgps8MoGFO5Y\nhuDamHzjcXwoXVRlyPVUBUkF6IDnURDD87/1LSqy1GiTa3wHp1md1IfexWXMZh5o\nKqE8yhsvAgMBAAECggEAUcuxcw19G6HOAYNm2ucLbvMlbsXcjC00ayjoSw6ZBVE3\nNFoQT+YC8jTkOw5+5J7VuRrLN23pHXfSTJmXt9t/gUcLmeLPoC+DHjFrlWJstl+T\nz4CFI1ICCTVzxlQDFxYHP3yGFuwJv1HjVEHIcUBzH3MIMqiX2KlvQA9NjwA5071z\nQhbY//P3KBlqJCrvZLqv3017agDZogvMY5E+ggqFS/g7Ykr29PPN0ei1VQq0HYnl\n790SS8aawCvtdRxoys6K4JeM7sl1kS+eXkVesbVube2bqaohKImb4v0XszYTUDsE\nxKBaDhkbJpg0Ybk68v64a3NPknNPub/VWp15Yh6OIQKBgQD/SocToT72cgNx53yt\nHAwlX88R7X9R1ftvt0mAisPvhrvG1yHLXvIr0iwa/An1cqPu0BrBLKz6lMvSKRBz\nEq9/sXn9V9DRD7kML/OOTRPXUgqFV1XJUBXH+wfXoZgXdgv8BPcol162eqD+b4wH\nsgaNoC2n7B+NQWBLwbARxwYrywKBgQC64kbqEhMsodCA5jk+NWXRu3NwMCN/K1ob\n1iwovKiOfvjlx18gJC2A08icKfMxrn3SBjiKqSv6KQYTCt+qSa+b7AW3Fmu57TwY\nt3DaYA5GfGXYq3SYxF1gkh6QCnGasUIL0EdBnqRBvccp+L8x3f8/vi3qHSDudpec\n8ZHXxHEprQKBgQD4dGn9usJySwf7RRVbzJ4tiY8XnZJ57M1mLnWEeoiyhugdXqZv\nLRp3d3ahVIXEsSvGchZ3xqkavtGW2Yw+0gKnPezBmUOLE8g+ijR5W55hwmCm4RaG\ndECefjtlqslAnAyR26tHf/oXkkU5GwqnOqWSFEAa23zhlqzHTduzkYT5/QKBgAbB\nYTDa4GiPnNrb95vBEGIpdX3Lr6zMI2C4ODZsw2cLPfIIZ+7gf+iVPz4t4gWcuh2a\nbfbNMLLFQtvzW6xrJ3bqbDZ3EAPTiIWYM/Mg38M6ge/4GqnfB0UTYxlv1zVxTOLi\nb4D2vBdIRefFfxvNW4mxVTWOQf98t/RLYys6haCtAoGBAMUbPSMatTuvFEfpAHEW\nhsEPSRFOwCA3pYAVKRsYu3JBWiIBtb4dp1rgleykvfrWS/ftzAXNNCIwlFoGR8Xq\nhpefLQETijPYhZj7uL4qHmQw20KNe4PxSpoI20e04gdr+5xB1aCcloHRjBR0P4UE\n+pkr7WvbolKIsxhCmsJvCRRu\n-----END PRIVATE KEY-----\n",
+  "client_email": "mhg-kaz-group@local-volt-399322.iam.gserviceaccount.com",
+  "client_id": "102036178857348559738",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/mhg-kaz-group%40local-volt-399322.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
