@@ -1,12 +1,14 @@
 import asyncpg
 from docs import generate_and_upload
+import logging
+import json
 
 
 async def create_pool():
     return await asyncpg.create_pool(
-        user="root",
+        user="postgres",
         password="1234",
-        database="your_database",
+        database="bot_users",
         host="localhost",
     )
 
@@ -18,6 +20,7 @@ async def create_table(conn):
         user_id SERIAL PRIMARY KEY,
         phone_number VARCHAR(20),
         name VARCHAR(100),
+        age INTEGER,
         answers JSONB,
         recommendations JSONB
     );
@@ -25,23 +28,36 @@ async def create_table(conn):
     )
 
 
-async def save_user_data(conn, user_id, phone_number, name, answers, recommendations):
+async def save_user_data(
+    conn, user_id, phone_number, name, age, answers, recommendations
+):
+    logging.info(f"Saving data for user {user_id}...")
+    json_answers = json.dumps(answers)
+    json_recommendations = json.dumps(recommendations)
     await conn.execute(
         """
-        INSERT INTO users (user_id, phone_number, name, answers, recommendations) VALUES ($1, $2, $3)
-        ON CONFLICT (id) DO UPDATE
-        SET answers = $2, recommendations = $3;
-    """,
+        INSERT INTO users (user_id, phone_number, name, age, answers, recommendations)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT (user_id) DO UPDATE
+        SET phone_number = EXCLUDED.phone_number,
+            name = EXCLUDED.name,
+            age = EXCLUDED.age,
+            answers = EXCLUDED.answers,
+            recommendations = EXCLUDED.recommendations;
+        """,
         user_id,
         phone_number,
         name,
-        answers,
-        recommendations,
+        age,
+        json_answers,
+        json_recommendations,
     )
+
     data = {
         "user_id": user_id,
         "name": name,
         "phone_number": phone_number,
+        "age": age,
         "answers": answers,
         "recommendations": recommendations,
     }
@@ -50,4 +66,4 @@ async def save_user_data(conn, user_id, phone_number, name, answers, recommendat
 
 
 async def get_user_data(conn, user_id):
-    return await conn.fetchrow("SELECT * FROM users WHERE id = $1;", user_id)
+    return await conn.fetchrow("SELECT * FROM users WHERE user_id = $1;", user_id)

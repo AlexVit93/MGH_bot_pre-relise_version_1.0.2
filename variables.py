@@ -1,7 +1,4 @@
 from text import baa_list
-from main import *
-from handlers import *
-from states import *
 import random
 
 

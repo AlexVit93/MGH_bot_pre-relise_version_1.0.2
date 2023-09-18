@@ -7,7 +7,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from db import save_user_data, get_user_data
 from variables import get_recommended_baas
-from variables import calculate_recommendations
 from questions import question_pack
 from kb import buttons
 
@@ -310,9 +309,20 @@ async def process_final_question(
 
 
 async def some_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    logging.info("Entered some_handler...")
     user_data = await state.get_data()
-    recommended_baas = calculate_recommendations(user_data)
+    phone_number = user_data.get("phone_number")
+    name = user_data.get("name")
+    age = user_data.get("age")
+    recommended_baas = get_recommended_baas(user_data)
+
     async with dp["db_pool"].acquire() as conn:
         await save_user_data(
-            conn, callback_query.from_user.id, user_data, recommended_baas
+            conn,
+            callback_query.from_user.id,
+            phone_number,
+            name,
+            age,
+            user_data,
+            recommended_baas,
         )

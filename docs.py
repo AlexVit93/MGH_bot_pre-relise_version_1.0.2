@@ -10,6 +10,7 @@ def create_docx(data):
     doc.add_paragraph(f"User ID: {data['user_id']}")
     doc.add_paragraph(f"Name: {data['name']}")
     doc.add_paragraph(f"Phone_number: {data['phone_number']}")
+    doc.add_paragraph(f"Age: {data['age']}")
     doc.add_paragraph(f"Answers: {data['answers']}")
     doc.add_paragraph(f"Recommendations: {data['recommendations']}")
 
@@ -20,10 +21,10 @@ def create_docx(data):
 
 
 def upload_to_drive(filename):
-    creds = Credentials.from_service_account_file("your_service_account.json")
+    creds = Credentials.from_service_account_file("local-volt-399322-5c1d9c000102.json")
     drive_service = build("drive", "v3", credentials=creds)
 
-    file_metadata = {"name": filename}
+    file_metadata = {"name": filename, "parents": ["1Ly8tlk0aCEEql5_cN7_EnO8H_rQ9Shn0"]}
     media = MediaFileUpload(filename)
     drive_service.files().create(body=file_metadata, media_body=media).execute()
 

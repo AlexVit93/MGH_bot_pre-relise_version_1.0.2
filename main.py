@@ -3,14 +3,15 @@ from aiogram import Bot, Dispatcher
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from config import *
-from states import *
-from handlers import *
+from config import API_TOKEN
+
+# from handlers import *
 from db import create_pool
 from db import create_table
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
+
 
 # Инициализация бота и диспетчера
 bot = Bot(token=API_TOKEN)
