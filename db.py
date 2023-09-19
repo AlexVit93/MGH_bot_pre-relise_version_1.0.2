@@ -2,15 +2,12 @@ import asyncpg
 from docs import generate_and_upload
 import logging
 import json
+import os
 
 
 async def create_pool():
-    return await asyncpg.create_pool(
-        user="postgres",
-        password="1234",
-        database="bot_users",
-        host="localhost",
-    )
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    return await asyncpg.create_pool(dsn=DATABASE_URL)
 
 
 async def create_table(conn):
