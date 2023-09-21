@@ -2,12 +2,15 @@ import asyncpg
 from docs import generate_and_upload
 import logging
 import json
-import os
 
 
 async def create_pool():
-    DATABASE_URL = os.getenv("DATABASE_URL")
-    return await asyncpg.create_pool(dsn=DATABASE_URL)
+    return await asyncpg.create_pool(
+        user="postgres",
+        password="1234",
+        database="special_users",
+        host="localhost",
+    )
 
 
 async def create_table(conn):
@@ -15,7 +18,7 @@ async def create_table(conn):
         """
     CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
-        phone_number VARCHAR(20),
+        phone_number JSONB,
         name VARCHAR(100),
         age INTEGER,
         answers JSONB,
@@ -31,24 +34,29 @@ async def save_user_data(
     logging.info(f"Saving data for user {user_id}...")
     json_answers = json.dumps(answers)
     json_recommendations = json.dumps(recommendations)
-    await conn.execute(
-        """
-        INSERT INTO users (user_id, phone_number, name, age, answers, recommendations)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT (user_id) DO UPDATE
-        SET phone_number = EXCLUDED.phone_number,
-            name = EXCLUDED.name,
-            age = EXCLUDED.age,
-            answers = EXCLUDED.answers,
-            recommendations = EXCLUDED.recommendations;
-        """,
-        user_id,
-        phone_number,
-        name,
-        age,
-        json_answers,
-        json_recommendations,
-    )
+    try:
+        result = await conn.execute(
+            """
+            INSERT INTO users (user_id, phone_number, name, age, answers, recommendations)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (user_id) DO UPDATE
+            SET phone_number = EXCLUDED.phone_number,
+                name = EXCLUDED.name,
+                age = EXCLUDED.age,
+                answers = EXCLUDED.answers,
+                recommendations = EXCLUDED.recommendations;
+            """,
+            user_id,
+            phone_number,
+            name,
+            age,
+            json_answers,
+            json_recommendations,
+        )
+        logging.info(f"Query result: {result}")
+
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
 
     data = {
         "user_id": user_id,

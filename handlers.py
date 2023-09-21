@@ -1,3 +1,4 @@
+import asyncio
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from main import dp
@@ -9,6 +10,7 @@ from db import save_user_data, get_user_data
 from variables import get_recommended_baas
 from questions import question_pack
 from kb import buttons
+from docs import generate_and_upload
 
 
 @dp.message_handler(lambda message: message.text == "Начать", state="*")
@@ -22,25 +24,45 @@ async def user_name(message: types.Message):
 async def phone(message: types.Message, state: FSMContext):
     await Questionnaire.Phone.set()
     await state.update_data(name=message.text)
-    markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    btn_request = KeyboardButton("Отправить мой номер телефона", request_contact=True)
-    markup.add(btn_request)
     await message.answer(
-        "Приятно познакомиться! Предоставьте ваш контактный номер, пожалуйста",
-        reply_markup=markup,
+        "Приятно познакомиться! Введите ваш контактный номер телефона, пожалуйста."
     )
 
 
-@dp.message_handler(content_types=["contact"], state=Questionnaire.Phone)
-async def handle_contact(message: types.Message, state: FSMContext):
-    if message.contact:
-        await state.update_data(phone=message.contact.phone_number)
+@dp.message_handler(state=Questionnaire.Phone)
+async def handle_phone(message: types.Message, state: FSMContext):
+    phone_number = message.text
+    # Здесь вы можете добавить проверку валидности номера телефона, если хотите
+    await state.update_data(phone=phone_number)
 
-        await message.answer("Спасибо, получил ваш номер!")
-        await Questionnaire.Age.set()  # переходим к следующему этапу
-        await user_age(message, state)  # вызываем функцию user_age
-    else:
-        await message.answer("Что-то пошло не так, попробуйте еще раз.")
+    await message.answer("Спасибо, получил ваш номер!")
+    await Questionnaire.Age.set()
+    await user_age(message, state)
+
+
+# @dp.message_handler(state=Questionnaire.Name)
+# async def phone(message: types.Message, state: FSMContext):
+#     await Questionnaire.Phone.set()
+#     await state.update_data(name=message.text)
+#     markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+#     btn_request = KeyboardButton("Отправить мой номер телефона", request_contact=True)
+#     markup.add(btn_request)
+#     await message.answer(
+#         "Приятно познакомиться! Предоставьте ваш контактный номер, пожалуйста",
+#         reply_markup=markup,
+#     )
+
+
+# @dp.message_handler(content_types=["contact"], state=Questionnaire.Phone)
+# async def handle_contact(message: types.Message, state: FSMContext):
+#     if message.contact:
+#         await state.update_data(phone=message.contact.phone_number)
+
+#         await message.answer("Спасибо, получил ваш номер!")
+#         await Questionnaire.Age.set()
+#         await user_age(message, state)
+#     else:
+#         await message.answer("Что-то пошло не так, попробуйте еще раз.")
 
 
 @dp.message_handler(state=Questionnaire.Phone)
@@ -58,7 +80,7 @@ async def user_age(message_or_callback: types.Message, state: FSMContext):
 async def handle_age(callback_query: types.CallbackQuery, state: FSMContext):
     age_choice = callback_query.data
     await state.update_data(age=age_choice)
-    await callback_query.answer(f"Вы выбрали: {age_choice}")
+    # await callback_query.answer(f"Вы выбрали: {age_choice}")
     await Questionnaire.VegConsumption.set()
     await veg_consumption(callback_query.message, state)
 
@@ -326,3 +348,7 @@ async def some_handler(callback_query: types.CallbackQuery, state: FSMContext):
             user_data,
             recommended_baas,
         )
+        user_data_db = await get_user_data(conn, callback_query.from_user.id)
+
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, generate_and_upload, user_data_db)
