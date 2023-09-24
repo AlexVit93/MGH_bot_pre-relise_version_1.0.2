@@ -1,16 +1,15 @@
-import asyncio
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from main import dp
 from main import logging
 from states import Questionnaire
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from db import save_user_data, get_user_data
 from variables import get_recommended_baas
 from questions import question_pack
 from kb import buttons
-from docs import generate_and_upload
+from db import save_user_data
+
+# from utils import question_mapping, answer_mapping
 
 
 @dp.message_handler(lambda message: message.text == "Начать", state="*")
@@ -32,37 +31,12 @@ async def phone(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Questionnaire.Phone)
 async def handle_phone(message: types.Message, state: FSMContext):
     phone_number = message.text
-    # Здесь вы можете добавить проверку валидности номера телефона, если хотите
-    await state.update_data(phone=phone_number)
+
+    await state.update_data(phone_number=phone_number)
 
     await message.answer("Спасибо, получил ваш номер!")
     await Questionnaire.Age.set()
     await user_age(message, state)
-
-
-# @dp.message_handler(state=Questionnaire.Name)
-# async def phone(message: types.Message, state: FSMContext):
-#     await Questionnaire.Phone.set()
-#     await state.update_data(name=message.text)
-#     markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-#     btn_request = KeyboardButton("Отправить мой номер телефона", request_contact=True)
-#     markup.add(btn_request)
-#     await message.answer(
-#         "Приятно познакомиться! Предоставьте ваш контактный номер, пожалуйста",
-#         reply_markup=markup,
-#     )
-
-
-# @dp.message_handler(content_types=["contact"], state=Questionnaire.Phone)
-# async def handle_contact(message: types.Message, state: FSMContext):
-#     if message.contact:
-#         await state.update_data(phone=message.contact.phone_number)
-
-#         await message.answer("Спасибо, получил ваш номер!")
-#         await Questionnaire.Age.set()
-#         await user_age(message, state)
-#     else:
-#         await message.answer("Что-то пошло не так, попробуйте еще раз.")
 
 
 @dp.message_handler(state=Questionnaire.Phone)
@@ -85,9 +59,6 @@ async def handle_age(callback_query: types.CallbackQuery, state: FSMContext):
     await veg_consumption(callback_query.message, state)
 
 
-# Здесь вы можете продолжить диалог или завершить текущий этап
-
-
 @dp.callback_query_handler(
     lambda c: c.data in ["age_less_18", "age_18_35", "age_more_35"],
     state=Questionnaire.Age,
@@ -107,7 +78,8 @@ async def veg_consumption(message: types.Message, state: FSMContext):
 )
 async def fatigue_feeling(callback_query: types.CallbackQuery, state: FSMContext):
     await Questionnaire.FatigueFeeling.set()
-    await state.update_data(veg_consumption=callback_query.data)
+    # await state.update_data(veg_consumption=callback_query.data)
+    await state.update_data(answers={"veg_consumption": callback_query.data})
     markup = InlineKeyboardMarkup()
     markup.row(buttons["fatigue_yes"], buttons["fatigue_no"])
     question_text = question_pack.get("q_2", "Вопрос не найден")
@@ -321,34 +293,25 @@ async def process_final_question(
     callback_query: types.CallbackQuery, state: FSMContext
 ):
     user_data = await state.get_data()
-    await state.finish()
 
     recommended_baas = get_recommended_baas(user_data)
+
+    user_id = callback_query.from_user.id
+
+    # Добавьте запись в базу данных. Вызовите функцию save_user_data здесь.
+    async with dp["db_pool"].acquire() as conn:
+        await save_user_data(
+            conn,
+            user_id,
+            user_data.get("phone_number"),
+            user_data.get("name"),
+            user_data.get("age"),
+            user_data.get("answers"),
+            user_data.get("recommendations"),
+        )
+
+    await state.finish()
 
     await callback_query.message.answer(
         f"Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: {', '.join(recommended_baas)}"
     )
-
-
-async def some_handler(callback_query: types.CallbackQuery, state: FSMContext):
-    logging.info("Entered some_handler...")
-    user_data = await state.get_data()
-    phone_number = user_data.get("phone_number")
-    name = user_data.get("name")
-    age = user_data.get("age")
-    recommended_baas = get_recommended_baas(user_data)
-
-    async with dp["db_pool"].acquire() as conn:
-        await save_user_data(
-            conn,
-            callback_query.from_user.id,
-            phone_number,
-            name,
-            age,
-            user_data,
-            recommended_baas,
-        )
-        user_data_db = await get_user_data(conn, callback_query.from_user.id)
-
-    loop = asyncio.get_event_loop()
-    loop.run_in_executor(None, generate_and_upload, user_data_db)

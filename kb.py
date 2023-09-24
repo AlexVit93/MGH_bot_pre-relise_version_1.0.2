@@ -58,3 +58,9 @@ buttons = {
     "beauty_yes": InlineKeyboardButton("Да", callback_data="beauty_yes"),
     "beauty_no": InlineKeyboardButton("Нет", callback_data="beauty_no"),
 }
+
+age_buttons = {
+    "age_less_18": "Меньше 18 лет",
+    "age_18_35": "18-35 лет",
+    "age_more_35": "Старше 35 лет",
+}

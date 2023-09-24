@@ -5,7 +5,6 @@ from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import API_TOKEN
 
-# from handlers import *
 from db import create_pool
 from db import create_table
 
