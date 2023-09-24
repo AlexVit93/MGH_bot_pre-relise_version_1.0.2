@@ -9,7 +9,7 @@ from questions import question_pack
 from kb import buttons
 from db import save_user_data
 
-# from utils import question_mapping, answer_mapping
+
 
 
 @dp.message_handler(lambda message: message.text == "Начать", state="*")

@@ -2,6 +2,7 @@ import asyncpg
 from docs import generate_and_upload
 import logging
 import json
+from utils import question_mapping, answer_mapping
 
 
 async def create_pool():
@@ -28,11 +29,20 @@ async def create_table(conn):
     )
 
 
+def transform_answers(answers):
+    readable_answers = {}
+    for key, value in answers.items():
+        question = question_mapping[key]
+        answer = answer_mapping[value]
+        readable_answers[question] = answer
+    return readable_answers
+
 async def save_user_data(
     conn, user_id, phone_number, name, age, answers, recommendations
 ):
     logging.info(f"Saving data for user {user_id}...")
-    json_answers = json.dumps(answers)
+    readable_answers = transform_answers(answers)
+    json_answers = json.dumps(readable_answers)
     json_recommendations = json.dumps(recommendations)
     try:
         result = await conn.execute(
@@ -63,7 +73,7 @@ async def save_user_data(
         "name": name,
         "phone_number": phone_number,
         "age": age,
-        "answers": answers,
+        "answers": readable_answers,
         "recommendations": recommendations,
     }
 
