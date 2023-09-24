@@ -10,8 +10,6 @@ from kb import buttons
 from db import save_user_data
 
 
-
-
 @dp.message_handler(lambda message: message.text == "Начать", state="*")
 @dp.message_handler(commands="start", state="*")
 async def user_name(message: types.Message):
@@ -77,9 +75,11 @@ async def veg_consumption(message: types.Message, state: FSMContext):
     lambda c: c.data in ["veg_yes", "veg_no"], state=Questionnaire.VegConsumption
 )
 async def fatigue_feeling(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"veg_consumption": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.FatigueFeeling.set()
-    # await state.update_data(veg_consumption=callback_query.data)
-    await state.update_data(answers={"veg_consumption": callback_query.data})
     markup = InlineKeyboardMarkup()
     markup.row(buttons["fatigue_yes"], buttons["fatigue_no"])
     question_text = question_pack.get("q_2", "Вопрос не найден")
@@ -91,8 +91,11 @@ async def fatigue_feeling(callback_query: types.CallbackQuery, state: FSMContext
     state=Questionnaire.FatigueFeeling,
 )
 async def seafood_consumption(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"fatigue_feeling": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.SeafoodConsumption.set()
-    await state.update_data(fatigue_feeling=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["seafood_yes"], buttons["seafood_no"])
     question_text = question_pack.get("q_3", "Вопрос не найден")
@@ -107,8 +110,11 @@ async def seafood_consumption(callback_query: types.CallbackQuery, state: FSMCon
     state=Questionnaire.SeafoodConsumption,
 )
 async def memory_issues(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"seafood_consumption": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.MemoryIssues.set()
-    await state.update_data(seafood_consumption=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(
         buttons["memory_often"], buttons["memory_sometimes"], buttons["memory_rarely"]
@@ -125,8 +131,11 @@ async def memory_issues(callback_query: types.CallbackQuery, state: FSMContext):
     state=Questionnaire.MemoryIssues,
 )
 async def screen_time(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"memory_issues": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.ScreenTime.set()
-    await state.update_data(memory_issues=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["screen_often"], buttons["screen_rarely"])
     question_text = question_pack.get("q_5", "Вопрос не найден")
@@ -141,8 +150,11 @@ async def screen_time(callback_query: types.CallbackQuery, state: FSMContext):
     state=Questionnaire.ScreenTime,
 )
 async def vision_problems(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"screen_time": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.VisionProblems.set()
-    await state.update_data(screen_time=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["vision_yes"], buttons["vision_no"])
     question_text = question_pack.get("q_6", "Вопрос не найден")
@@ -156,8 +168,11 @@ async def vision_problems(callback_query: types.CallbackQuery, state: FSMContext
     lambda c: c.data in ["vision_yes", "vision_no"], state=Questionnaire.VisionProblems
 )
 async def joint_mobility(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"vision_problems": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.JointMobility.set()
-    await state.update_data(vision_problems=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["joints_yes"], buttons["joints_no"])
     question_text = question_pack.get("q_7", "Вопрос не найден")
@@ -171,8 +186,11 @@ async def joint_mobility(callback_query: types.CallbackQuery, state: FSMContext)
     lambda c: c.data in ["joints_yes", "joints_no"], state=Questionnaire.JointMobility
 )
 async def active_sport(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"joint_mobility": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.ActiveSport.set()
-    await state.update_data(joint_mobility=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["sport_yes"], buttons["sport_no"])
     question_text = question_pack.get("q_8", "Вопрос не найден")
@@ -183,8 +201,11 @@ async def active_sport(callback_query: types.CallbackQuery, state: FSMContext):
     lambda c: c.data in ["sport_yes", "sport_no"], state=Questionnaire.ActiveSport
 )
 async def numbness(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"active_sport": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.Numbness.set()
-    await state.update_data(active_sport=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["numbness_often"], buttons["numbness_rarely"])
     question_text = question_pack.get("q_9", "Вопрос не найден")
@@ -199,8 +220,11 @@ async def numbness(callback_query: types.CallbackQuery, state: FSMContext):
     state=Questionnaire.Numbness,
 )
 async def headaches(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"numbness": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.Headaches.set()
-    await state.update_data(numbness=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["headaches_often"], buttons["headaches_rarely"])
     question_text = question_pack.get("q_10", "Вопрос не найден")
@@ -215,8 +239,11 @@ async def headaches(callback_query: types.CallbackQuery, state: FSMContext):
     state=Questionnaire.Headaches,
 )
 async def youthfulness(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"headaches": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.Youthfulness.set()
-    await state.update_data(headaches=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["youthfulness_yes"], buttons["youthfulness_no"])
     question_text = question_pack.get("q_11", "Вопрос не найден")
@@ -228,8 +255,11 @@ async def youthfulness(callback_query: types.CallbackQuery, state: FSMContext):
     state=Questionnaire.Youthfulness,
 )
 async def detox(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"youthfulness": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.Detox.set()
-    await state.update_data(youthfulness=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["detox_yes"], buttons["detox_no"])
     question_text = question_pack.get("q_12", "Вопрос не найден")
@@ -243,8 +273,13 @@ async def detox(callback_query: types.CallbackQuery, state: FSMContext):
     lambda c: c.data in ["detox_yes", "detox_no"], state=Questionnaire.Detox
 )
 async def digestion(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"detox": callback_query.data})
+    await state.update_data(answers=current_answers)
+
     await Questionnaire.Digestion.set()
-    await state.update_data(detox=callback_query.data)
+
     markup = InlineKeyboardMarkup()
     markup.row(buttons["digestion_yes"], buttons["digestion_no"])
     question_text = question_pack.get("q_13", "Вопрос не найден")
@@ -258,8 +293,11 @@ async def digestion(callback_query: types.CallbackQuery, state: FSMContext):
     lambda c: c.data in ["digestion_yes", "digestion_no"], state=Questionnaire.Digestion
 )
 async def reproductive_support(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"digestion": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.ReproductiveSupport.set()
-    await state.update_data(digestion=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["repro_support_yes"], buttons["repro_support_no"])
     question_text = question_pack.get("q_14", "Вопрос не найден")
@@ -274,8 +312,11 @@ async def reproductive_support(callback_query: types.CallbackQuery, state: FSMCo
     state=Questionnaire.ReproductiveSupport,
 )
 async def beauty_enhancement(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"repro_support": callback_query.data})
+    await state.update_data(answers=current_answers)
     await Questionnaire.BeautyEnhancement.set()
-    await state.update_data(repro_support=callback_query.data)
     markup = InlineKeyboardMarkup()
     markup.row(buttons["beauty_yes"], buttons["beauty_no"])
     question_text = question_pack.get("q_15", "Вопрос не найден")
@@ -292,13 +333,15 @@ async def beauty_enhancement(callback_query: types.CallbackQuery, state: FSMCont
 async def process_final_question(
     callback_query: types.CallbackQuery, state: FSMContext
 ):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"beauty_enhancement": callback_query.data})
+    await state.update_data(answers=current_answers)
+
     user_data = await state.get_data()
-
     recommended_baas = get_recommended_baas(user_data)
-
     user_id = callback_query.from_user.id
 
-    # Добавьте запись в базу данных. Вызовите функцию save_user_data здесь.
     async with dp["db_pool"].acquire() as conn:
         await save_user_data(
             conn,
@@ -307,7 +350,7 @@ async def process_final_question(
             user_data.get("name"),
             user_data.get("age"),
             user_data.get("answers"),
-            user_data.get("recommendations"),
+            recommended_baas,
         )
 
     await state.finish()

@@ -17,9 +17,9 @@ async def create_pool():
 async def create_table(conn):
     await conn.execute(
         """
-    CREATE TABLE IF NOT EXISTS n3 (
+    CREATE TABLE IF NOT EXISTS n6 (
         user_id SERIAL PRIMARY KEY,
-        phone_number VARCHAR(10),
+        phone_number VARCHAR(30),
         name VARCHAR(100),
         age VARCHAR(30),
         answers JSONB,
@@ -37,6 +37,7 @@ def transform_answers(answers):
         readable_answers[question] = answer
     return readable_answers
 
+
 async def save_user_data(
     conn, user_id, phone_number, name, age, answers, recommendations
 ):
@@ -47,7 +48,7 @@ async def save_user_data(
     try:
         result = await conn.execute(
             """
-            INSERT INTO n3 (user_id, phone_number, name, age, answers, recommendations)
+            INSERT INTO n6 (user_id, phone_number, name, age, answers, recommendations)
             VALUES ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (user_id) DO UPDATE
             SET phone_number = EXCLUDED.phone_number,
@@ -81,4 +82,4 @@ async def save_user_data(
 
 
 async def get_user_data(conn, user_id):
-    return await conn.fetchrow("SELECT * FROM n3 WHERE user_id = $1;", user_id)
+    return await conn.fetchrow("SELECT * FROM n6 WHERE user_id = $1;", user_id)
