@@ -1,4 +1,5 @@
 import asyncpg
+import os
 from docs import generate_and_upload
 import logging
 import json
@@ -6,12 +7,10 @@ from utils import question_mapping, answer_mapping
 
 
 async def create_pool():
-    return await asyncpg.create_pool(
-        PGUSER="postgres",
-        PGPASSWORD="kWt0XEdOQ90Bs18Dj8Ip",
-        PGDATABASE="railway",
-        PGHOST="containers-us-west-79.railway.app",
+    DATABASE_URL = os.environ.get(
+        "postgresql://postgres:kWt0XEdOQ90Bs18Dj8Ip@containers-us-west-79.railway.app:5932/railway"
     )
+    return await asyncpg.create_pool(DATABASE_URL)
 
 
 async def create_table(conn):
