@@ -17,7 +17,7 @@ async def create_pool():
 async def create_table(conn):
     await conn.execute(
         """
-    CREATE TABLE IF NOT EXISTS n9 (
+    CREATE TABLE IF NOT EXISTS n10 (
         user_id SERIAL PRIMARY KEY,
         phone_number BIGINT,
         name VARCHAR(100),
@@ -56,7 +56,7 @@ async def save_user_data(
     try:
         result = await conn.execute(
             """
-            INSERT INTO n9 (user_id, phone_number, name, age, answers, recommendations)
+            INSERT INTO n10 (user_id, phone_number, name, age, answers, recommendations)
             VALUES ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (user_id) DO UPDATE
             SET phone_number = EXCLUDED.phone_number,
@@ -90,4 +90,4 @@ async def save_user_data(
 
 
 async def get_user_data(conn, user_id):
-    return await conn.fetchrow("SELECT * FROM n9 WHERE user_id = $1;", user_id)
+    return await conn.fetchrow("SELECT * FROM n10 WHERE user_id = $1;", user_id)
