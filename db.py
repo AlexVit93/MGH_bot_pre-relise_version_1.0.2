@@ -7,10 +7,8 @@ from utils import question_mapping, answer_mapping
 
 
 async def create_pool():
-    DATABASE_URL = os.environ.get(
-        "postgresql://postgres:kWt0XEdOQ90Bs18Dj8Ip@containers-us-west-79.railway.app:5932/railway"
-    )
-    return await asyncpg.create_pool(DATABASE_URL)
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    return await asyncpg.create_pool(DATABASE_URL, ssl="require")
 
 
 async def create_table(conn):
