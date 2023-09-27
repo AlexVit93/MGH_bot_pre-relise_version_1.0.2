@@ -7,10 +7,10 @@ from utils import question_mapping, answer_mapping
 
 async def create_pool():
     return await asyncpg.create_pool(
-        user="postgres",
-        password="1234",
-        database="postgres",
-        host="localhost",
+        PGUSER="postgres",
+        PGPASSWORD="kWt0XEdOQ90Bs18Dj8Ip",
+        PGDATABASE="railway",
+        PGHOST="containers-us-west-79.railway.app",
     )
 
 
