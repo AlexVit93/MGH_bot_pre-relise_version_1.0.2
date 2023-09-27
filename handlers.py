@@ -1,13 +1,13 @@
+import re
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from main import dp
-from main import logging
+from main import dp, logging
 from states import Questionnaire
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from variables import get_recommended_baas
 from questions import question_pack
-from kb import buttons
-from db import save_user_data
+from kb import buttons, restart_and_view_kb
+from db import save_user_data, get_user_data
 
 
 @dp.message_handler(lambda message: message.text == "Начать", state="*")
@@ -29,6 +29,11 @@ async def phone(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Questionnaire.Phone)
 async def handle_phone(message: types.Message, state: FSMContext):
     phone_number = message.text
+
+    # Проверка на ввод только чисел
+    if not re.match(r"^\d+$", phone_number):
+        await message.answer("Введите только номер телефона (только цифры)!")
+        return
 
     await state.update_data(phone_number=phone_number)
 
@@ -52,7 +57,6 @@ async def user_age(message_or_callback: types.Message, state: FSMContext):
 async def handle_age(callback_query: types.CallbackQuery, state: FSMContext):
     age_choice = callback_query.data
     await state.update_data(age=age_choice)
-    # await callback_query.answer(f"Вы выбрали: {age_choice}")
     await Questionnaire.VegConsumption.set()
     await veg_consumption(callback_query.message, state)
 
@@ -338,6 +342,10 @@ async def process_final_question(
     current_answers.update({"beauty_enhancement": callback_query.data})
     await state.update_data(answers=current_answers)
 
+    await callback_query.message.answer(
+        "Ваши ответы обрабатываются, нам нужно буквально 10-15 секунд или менее..."
+    )
+
     user_data = await state.get_data()
     recommended_baas = get_recommended_baas(user_data)
     user_id = callback_query.from_user.id
@@ -356,5 +364,29 @@ async def process_final_question(
     await state.finish()
 
     await callback_query.message.answer(
-        f"Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: {', '.join(recommended_baas)}"
+        f"Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: {', '.join(recommended_baas)}\n\nЕсли желаете перезапустить опрос - нажмите на кнопку \"Перезапуск\", если желаете посмотреть ваши рекомендации - нажмите на кнопку \"Мои БАДы\".",
+        reply_markup=restart_and_view_kb,
     )
+
+
+@dp.callback_query_handler(lambda c: c.data == "restart_bot")
+async def restart_bot(callback_query: types.CallbackQuery):
+    await callback_query.answer(callback_query.id)
+    await user_name(callback_query.message)
+
+
+@dp.callback_query_handler(lambda c: c.data == "view_recommendations")
+async def view_recommendations(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    async with dp["db_pool"].acquire() as conn:
+        user_data = await get_user_data(conn, user_id)
+
+    if user_data and user_data.get("recommendations"):
+        await callback_query.message.answer(
+            f"Ваши последние рекомендации: {' '.join(user_data['recommendations'])}"
+        )
+    else:
+        await callback_query.message.answer(
+            "У вас пока нет никаких рекомендаций, нажмите /start и пройдите опрос!"
+        )
+    await callback_query.answer(callback_query.id)

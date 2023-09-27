@@ -1,8 +1,10 @@
+import os
 from docx import Document
 from uuid import uuid4
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
+
 
 def create_docx(data):
     doc = Document()
@@ -11,7 +13,7 @@ def create_docx(data):
     doc.add_paragraph(f"Phone_number: {data['phone_number']}")
     doc.add_paragraph(f"Age: {data['age']}")
 
-    for question, answer in data['answers'].items():
+    for question, answer in data["answers"].items():
         doc.add_paragraph(f"{question}: {answer}")
 
     doc.add_paragraph(f"Recommendations: {data['recommendations']}")
@@ -20,7 +22,6 @@ def create_docx(data):
     doc.save(filename)
 
     return filename
-
 
 
 def upload_to_drive(filename):
@@ -35,3 +36,4 @@ def upload_to_drive(filename):
 def generate_and_upload(data):
     filename = create_docx(data)
     upload_to_drive(filename)
+    os.remove(filename)

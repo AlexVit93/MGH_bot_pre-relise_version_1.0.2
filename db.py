@@ -17,9 +17,9 @@ async def create_pool():
 async def create_table(conn):
     await conn.execute(
         """
-    CREATE TABLE IF NOT EXISTS n6 (
+    CREATE TABLE IF NOT EXISTS n9 (
         user_id SERIAL PRIMARY KEY,
-        phone_number VARCHAR(30),
+        phone_number BIGINT,
         name VARCHAR(100),
         age VARCHAR(30),
         answers JSONB,
@@ -45,10 +45,18 @@ async def save_user_data(
     readable_answers = transform_answers(answers)
     json_answers = json.dumps(readable_answers)
     json_recommendations = json.dumps(recommendations)
+
+    # Преобразование номера телефона из строки в число
+    try:
+        phone_number = int(phone_number)
+    except ValueError:
+        logging.error(f"Invalid phone number format: {phone_number}")
+        return
+
     try:
         result = await conn.execute(
             """
-            INSERT INTO n6 (user_id, phone_number, name, age, answers, recommendations)
+            INSERT INTO n9 (user_id, phone_number, name, age, answers, recommendations)
             VALUES ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (user_id) DO UPDATE
             SET phone_number = EXCLUDED.phone_number,
@@ -82,4 +90,4 @@ async def save_user_data(
 
 
 async def get_user_data(conn, user_id):
-    return await conn.fetchrow("SELECT * FROM n6 WHERE user_id = $1;", user_id)
+    return await conn.fetchrow("SELECT * FROM n9 WHERE user_id = $1;", user_id)

@@ -1,4 +1,5 @@
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 
 buttons = {
     "veg_yes": InlineKeyboardButton(
@@ -59,8 +60,9 @@ buttons = {
     "beauty_no": InlineKeyboardButton("Нет", callback_data="beauty_no"),
 }
 
-age_buttons = {
-    "age_less_18": "Меньше 18 лет",
-    "age_18_35": "18-35 лет",
-    "age_more_35": "Старше 35 лет",
-}
+
+restart_and_view_kb = InlineKeyboardMarkup(row_width=2)
+restart_and_view_kb.add(
+    InlineKeyboardButton("Перезапуск", callback_data="restart_bot"),
+    InlineKeyboardButton("Мои БАДы", callback_data="view_recommendations"),
+)
