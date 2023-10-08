@@ -58,6 +58,16 @@ buttons = {
     "repro_support_no": InlineKeyboardButton("Нет", callback_data="repro_support_no"),
     "beauty_yes": InlineKeyboardButton("Да", callback_data="beauty_yes"),
     "beauty_no": InlineKeyboardButton("Нет", callback_data="beauty_no"),
+    "conscious_yes": InlineKeyboardButton("Да", callback_data="conscious_yes"),
+    "conscious_no": InlineKeyboardButton("Нет", callback_data="conscious_no"),
+    "ready_yes": InlineKeyboardButton("Да", callback_data="ready_yes"),
+    "ready_no": InlineKeyboardButton("Нет", callback_data="ready_no"),
+    "male_support_yes": InlineKeyboardButton("Да", callback_data="male_support_yes"),
+    "male_support_no": InlineKeyboardButton("Нет", callback_data="male_support_no"),
+    "male_symptoms_yes": InlineKeyboardButton(
+        "Да, есть", callback_data="male_symptoms_yes"
+    ),
+    "male_symptoms_no": InlineKeyboardButton("Нет", callback_data="male_symptoms_no"),
 }
 
 

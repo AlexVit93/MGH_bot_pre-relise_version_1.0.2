@@ -42,10 +42,9 @@ async def handle_phone(message: types.Message, state: FSMContext):
     await user_age(message, state)
 
 
-@dp.message_handler(state=Questionnaire.Phone)
+@dp.message_handler(state=Questionnaire.Age)
 async def user_age(message_or_callback: types.Message, state: FSMContext):
     logging.info("Inside user_age handler")
-
     markup = InlineKeyboardMarkup()
     markup.row(InlineKeyboardButton("Меньше 18 лет", callback_data="age_less_18"))
     markup.row(InlineKeyboardButton("18-35 лет", callback_data="age_18_35"))
@@ -57,14 +56,30 @@ async def user_age(message_or_callback: types.Message, state: FSMContext):
 async def handle_age(callback_query: types.CallbackQuery, state: FSMContext):
     age_choice = callback_query.data
     await state.update_data(age=age_choice)
-    await Questionnaire.VegConsumption.set()
-    await veg_consumption(callback_query.message, state)
+    await Questionnaire.Gender.set()
+    await user_gender(callback_query.message, state)
+
+
+@dp.message_handler(state=Questionnaire.Gender)
+async def user_gender(message_or_callback: types.Message, state: FSMContext):
+    logging.info("Inside user_gender handler")
+
+    markup = InlineKeyboardMarkup()
+    markup.row(InlineKeyboardButton("Мужчина", callback_data="male"))
+    markup.row(InlineKeyboardButton("Женщина", callback_data="female"))
+    await message_or_callback.answer("Ваш пол?", reply_markup=markup)
 
 
 @dp.callback_query_handler(
-    lambda c: c.data in ["age_less_18", "age_18_35", "age_more_35"],
-    state=Questionnaire.Age,
+    lambda c: c.data in ["male", "female"], state=Questionnaire.Gender
 )
+async def handle_gender(callback_query: types.CallbackQuery, state: FSMContext):
+    gender_choice = callback_query.data
+    await state.update_data(gender=gender_choice)
+    await Questionnaire.VegConsumption.set()
+    await veg_consumption(callback_query, state)
+
+
 async def veg_consumption(message: types.Message, state: FSMContext):
     markup = InlineKeyboardMarkup()
     markup.row(buttons["veg_yes"], buttons["veg_no"])
@@ -296,6 +311,74 @@ async def digestion(callback_query: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(
     lambda c: c.data in ["digestion_yes", "digestion_no"], state=Questionnaire.Digestion
 )
+async def transition_to_gender_specific_question(
+    callback_query: types.CallbackQuery, state: FSMContext
+):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"digestion": callback_query.data})
+    await state.update_data(answers=current_answers)
+
+    # Получите пол пользователя из state.
+    user_gender = current_data.get("gender")
+
+    if user_gender == "male":
+        await Questionnaire.MaleSupport.set()
+        markup = InlineKeyboardMarkup()
+        markup.row(buttons["male_support_yes"], buttons["male_support_no"])
+        question_text = question_pack.get("q_16", "Вопрос не найден")
+    elif user_gender == "female":
+        await Questionnaire.ReproductiveSupport.set()
+        markup = InlineKeyboardMarkup()
+        markup.row(buttons["repro_support_yes"], buttons["repro_support_no"])
+        question_text = question_pack.get("q_14", "Вопрос не найден")
+    else:
+        # Обработка случая, когда пол не установлен или установлен не верно
+        await callback_query.message.answer(
+            "Произошла ошибка, попробуйте начать заново."
+        )
+        return  # Прерываем дальнейшую обработку
+
+    await callback_query.message.answer(
+        question_text,
+        reply_markup=markup,
+    )
+
+
+async def male_support(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"digestion": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.MaleSupport.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(buttons["male_support_yes"], buttons["male_support_no"])
+    question_text = question_pack.get("q_16", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_text,
+        reply_markup=markup,
+    )
+
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["male_support_yes", "male_support_no"],
+    state=Questionnaire.MaleSupport,
+)
+async def male_symptoms(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"male_support": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.MaleSymptoms.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(buttons["male_symptoms_yes"], buttons["male_symptoms_no"])
+    question_text = question_pack.get("q_17", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_text,
+        reply_markup=markup,
+    )
+
+
 async def reproductive_support(callback_query: types.CallbackQuery, state: FSMContext):
     current_data = await state.get_data()
     current_answers = current_data.get("answers", {})
@@ -318,7 +401,7 @@ async def reproductive_support(callback_query: types.CallbackQuery, state: FSMCo
 async def beauty_enhancement(callback_query: types.CallbackQuery, state: FSMContext):
     current_data = await state.get_data()
     current_answers = current_data.get("answers", {})
-    current_answers.update({"repro_support": callback_query.data})
+    current_answers.update({"reproductive_support": callback_query.data})
     await state.update_data(answers=current_answers)
     await Questionnaire.BeautyEnhancement.set()
     markup = InlineKeyboardMarkup()
@@ -334,12 +417,50 @@ async def beauty_enhancement(callback_query: types.CallbackQuery, state: FSMCont
     lambda c: c.data in ["beauty_yes", "beauty_no"],
     state=Questionnaire.BeautyEnhancement,
 )
+async def conscious_response(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"beauty_enhancement": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.ConsciousResponse.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(buttons["conscious_yes"], buttons["conscious_no"])
+    question_text = question_pack.get("q_18", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_text,
+        reply_markup=markup,
+    )
+
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["conscious_yes", "conscious_no"],
+    state=Questionnaire.ConsciousResponse,
+)
+async def ready_response(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"conscious_response": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.ReadyResponse.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(buttons["ready_yes"], buttons["ready_no"])
+    question_text = question_pack.get("q_19", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_text,
+        reply_markup=markup,
+    )
+
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["ready_yes", "ready_no"],
+    state=Questionnaire.ReadyResponse,
+)
 async def process_final_question(
     callback_query: types.CallbackQuery, state: FSMContext
 ):
     current_data = await state.get_data()
     current_answers = current_data.get("answers", {})
-    current_answers.update({"beauty_enhancement": callback_query.data})
+    current_answers.update({"ready_response": callback_query.data})
     await state.update_data(answers=current_answers)
 
     await callback_query.message.answer(
@@ -354,9 +475,10 @@ async def process_final_question(
         await save_user_data(
             conn,
             user_id,
-            user_data.get("phone_number"),
             user_data.get("name"),
+            user_data.get("phone_number"),
             user_data.get("age"),
+            user_data.get("gender"),
             user_data.get("answers"),
             recommended_baas,
         )

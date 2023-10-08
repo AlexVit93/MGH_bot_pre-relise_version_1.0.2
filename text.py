@@ -10,5 +10,17 @@ baa_list = [
     "🥕Caroten",
     "🍃Chlorella",
     "🌿Zostera",
+    "🍃Vito Multix",
+    "🍤Vito Fishix",
     "🦴ArtroMarine",
 ]
+# baa_list = [
+#     "🌿Iodium Kelp",
+#     "🍃Spirulina",
+#     "🦪Squalene",
+#     "🍤CardioMarine",
+#     "🌊VitaMarine A",
+#     "🥕Caroten",
+#     "🌿Zostera",
+
+# ]

@@ -16,9 +16,10 @@ async def create_table(conn):
         """
     CREATE TABLE IF NOT EXISTS new_users (
         user_id SERIAL PRIMARY KEY,
-        phone_number BIGINT,
         name VARCHAR(100),
+        phone_number BIGINT,
         age VARCHAR(30),
+        gender VARCHAR(50),  
         answers JSONB,
         recommendations JSONB
     );
@@ -36,14 +37,13 @@ def transform_answers(answers):
 
 
 async def save_user_data(
-    conn, user_id, phone_number, name, age, answers, recommendations
+    conn, user_id, name, phone_number, age, gender, answers, recommendations
 ):
     logging.info(f"Saving data for user {user_id}...")
     readable_answers = transform_answers(answers)
     json_answers = json.dumps(readable_answers)
     json_recommendations = json.dumps(recommendations)
 
-    # Преобразование номера телефона из строки в число
     try:
         phone_number = int(phone_number)
     except ValueError:
@@ -53,19 +53,21 @@ async def save_user_data(
     try:
         result = await conn.execute(
             """
-            INSERT INTO new_users (user_id, phone_number, name, age, answers, recommendations)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO new_users (user_id, name, phone_number, age, gender, answers, recommendations)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (user_id) DO UPDATE
-            SET phone_number = EXCLUDED.phone_number,
-                name = EXCLUDED.name,
+            SET name = EXCLUDED.name,
+                phone_number = EXCLUDED.phone_number,
                 age = EXCLUDED.age,
+                gender = EXCLUDED.gender,  
                 answers = EXCLUDED.answers,
                 recommendations = EXCLUDED.recommendations;
             """,
             user_id,
-            phone_number,
             name,
+            phone_number,
             age,
+            gender,
             json_answers,
             json_recommendations,
         )
@@ -79,6 +81,7 @@ async def save_user_data(
         "name": name,
         "phone_number": phone_number,
         "age": age,
+        "gender": gender,
         "answers": readable_answers,
         "recommendations": recommendations,
     }

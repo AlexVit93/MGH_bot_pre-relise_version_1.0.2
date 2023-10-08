@@ -13,8 +13,6 @@ def get_recommended_baas(user_data):
                 [
                     "🦪Squalene",
                     "🍤CardioMarine",
-                    "🌊VitaMarine A",
-                    "🌊VitaMarine B",
                     "🌿IodiumKelp",
                     "🍃Ashitaba",
                     "🥕Caroten",
@@ -26,12 +24,12 @@ def get_recommended_baas(user_data):
             recommended_baas.extend(["🍃Ashitaba", "🦪Squalene"])
 
     # Рекомендации на основе остальных ответов:
-    if user_data.get("vegetable_intake") == "often":
+    if user_data.get("veg_consumption") == "often":
         recommended_baas.append("🌿Zostera")
-    elif user_data.get("vegetable_intake") == "rarely":
+    elif user_data.get("veg_consumption") == "rarely":
         recommended_baas.extend(["🍃Spirulina", "🍃Ashitaba", "🌿Zostera"])
 
-    if user_data.get("fatigue") == "often":
+    if user_data.get("fatigue_feeling") == "often":
         recommended_baas.extend(
             [
                 "🦪Squalene",
@@ -41,12 +39,12 @@ def get_recommended_baas(user_data):
                 "🌿IodiumKelp",
             ]
         )
-    elif user_data.get("fatigue") == "rarely":
+    elif user_data.get("fatigue_feeling") == "rarely":
         recommended_baas.extend(["🍃Ashitaba", "🥕Caroten"])
 
-    if user_data.get("seafood") == "often":
+    if user_data.get("seafood_consumption") == "often":
         recommended_baas.append("🍃Ashitaba")
-    elif user_data.get("seafood") == "rarely":
+    elif user_data.get("seafood_consumption") == "rarely":
         recommended_baas.extend(
             [
                 "🌊VitaMarine A",
@@ -65,7 +63,7 @@ def get_recommended_baas(user_data):
         recommended_baas.extend(["🍃Spirulina", "🍃Chlorella"])
 
     # Проблемы со зрением:
-    if user_data.get("vision_issues") == "yes":
+    if user_data.get("vision_problems") == "yes":
         recommended_baas.extend(["🥕Caroten", "🌊VitaMarine B"])
     else:
         recommended_baas.append("🌿IodiumKelp")
@@ -77,7 +75,7 @@ def get_recommended_baas(user_data):
         recommended_baas.append("🍃Ashitaba")
 
     # Проблемы с суставами:
-    if user_data.get("joint_issues") == "yes":
+    if user_data.get("joint_mobility") == "yes":
         recommended_baas.extend(["🍤ArtroMarine", "🦪Squalene"])
     else:
         recommended_baas.append("🍃Chlorella")
@@ -89,7 +87,7 @@ def get_recommended_baas(user_data):
         recommended_baas.append("🍃Chlorella")
 
     # Онемение и покалывания:
-    if user_data.get("numbness_tingling") == "often":
+    if user_data.get("numbness") == "often":
         recommended_baas.append("🍤CardioMarine")
     else:
         recommended_baas.append("🍃Chlorella")
@@ -101,13 +99,11 @@ def get_recommended_baas(user_data):
         recommended_baas.append("🥕Caroten")
 
     # Желание сохранить молодость:
-    if user_data.get("youth_importance") == "yes":
-        recommended_baas.extend(
-            ["🍃Ashitaba", "🌊VitaMarine A", "🌊VitaMarine B", "🍃Spirulina"]
-        )
+    if user_data.get("youthfulness") == "yes":
+        recommended_baas.extend(["🍃Ashitaba", "🦪Squalene", "🍃Spirulina"])
 
     # Потребность в детоксикации:
-    if user_data.get("detox_need") == "yes":
+    if user_data.get("detox") == "yes":
         recommended_baas.extend(["🍃Ashitaba", "🍃Chlorella", "🌿Zostera"])
     else:
         recommended_baas.extend(
@@ -115,7 +111,7 @@ def get_recommended_baas(user_data):
         )
 
     # Проблемы с пищеварением:
-    if user_data.get("digestion_issues") == "yes":
+    if user_data.get("digestion") == "yes":
         recommended_baas.extend(["🍃Ashitaba", "🌿Zostera", "🍃Chlorella"])
     else:
         recommended_baas.extend(
@@ -130,7 +126,7 @@ def get_recommended_baas(user_data):
         )
 
     # Поддержка репродуктивной системы:
-    if user_data.get("repro_support") == "repro_support_yes":
+    if user_data.get("reproductive_support") == "repro_support_yes":
         recommended_baas.append("🌿IodiumKelp")
     else:
         recommended_baas.extend(["🍃Ashitaba", "🍃Chlorella", "🌿Zostera", "🦪Squalene"])
@@ -142,6 +138,18 @@ def get_recommended_baas(user_data):
         recommended_baas.extend(
             ["🍃Ashitaba", "🍃Chlorella", "🍃Spirulina", "🌿IodiumKelp"]
         )
+
+        # Поддержка мужского здоровья:
+    if user_data.get("male_support") == "male_support_yes":
+        recommended_baas.append(["🍤CardioMarine", "🌊VitaMarine A"])
+    else:
+        recommended_baas.extend(["🍃Ashitaba", "🦪Squalene"])
+
+    # Есть ли симптомы бессоницы со стороны мужчин:
+    if user_data.get("male_symptoms") == "male_symptoms_yes":
+        recommended_baas.extend(["🍤CardioMarine", "🌊VitaMarine A"])
+    else:
+        recommended_baas.extend(["🍃Ashitaba", "🦪Squalene"])
 
     recommended_baas = list(set(recommended_baas))
     # Если рекомендованных бадов больше 3, выбираем рандомно 3 из них
