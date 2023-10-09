@@ -11,9 +11,10 @@ def create_docx(data):
     doc.add_paragraph(f"User ID: {data['user_id']}")
     doc.add_paragraph(f"Name: {data['name']}")
     doc.add_paragraph(f"Phone_number: {data['phone_number']}")
+    doc.add_paragraph(f"Gender: {data['gender']}")
     doc.add_paragraph(f"Age: {data['age']}")
 
-    for question, answer in data["answers"].items():
+    for question, answer in {**data["child_answers"], **data["answers"]}.items():
         doc.add_paragraph(f"{question}: {answer}")
 
     doc.add_paragraph(f"Recommendations: {data['recommendations']}")

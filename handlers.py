@@ -5,8 +5,8 @@ from main import dp, logging
 from states import Questionnaire
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from variables import get_recommended_baas
-from questions import question_pack
-from kb import buttons, restart_and_view_kb
+from questions import question_pack, child_questions
+from kb import buttons, child_buttons, restart_and_view_kb
 from db import save_user_data, get_user_data
 
 
@@ -38,26 +38,8 @@ async def handle_phone(message: types.Message, state: FSMContext):
     await state.update_data(phone_number=phone_number)
 
     await message.answer("Спасибо, получил ваш номер!")
-    await Questionnaire.Age.set()
-    await user_age(message, state)
-
-
-@dp.message_handler(state=Questionnaire.Age)
-async def user_age(message_or_callback: types.Message, state: FSMContext):
-    logging.info("Inside user_age handler")
-    markup = InlineKeyboardMarkup()
-    markup.row(InlineKeyboardButton("Меньше 18 лет", callback_data="age_less_18"))
-    markup.row(InlineKeyboardButton("18-35 лет", callback_data="age_18_35"))
-    markup.row(InlineKeyboardButton("Старше 35 лет", callback_data="age_more_35"))
-    await message_or_callback.answer("Ваш возраст?", reply_markup=markup)
-
-
-@dp.callback_query_handler(lambda c: c.data.startswith("age_"), state=Questionnaire.Age)
-async def handle_age(callback_query: types.CallbackQuery, state: FSMContext):
-    age_choice = callback_query.data
-    await state.update_data(age=age_choice)
     await Questionnaire.Gender.set()
-    await user_gender(callback_query.message, state)
+    await user_gender(message, state)
 
 
 @dp.message_handler(state=Questionnaire.Gender)
@@ -67,27 +49,202 @@ async def user_gender(message_or_callback: types.Message, state: FSMContext):
     markup = InlineKeyboardMarkup()
     markup.row(InlineKeyboardButton("Мужчина", callback_data="male"))
     markup.row(InlineKeyboardButton("Женщина", callback_data="female"))
+    
+    # Спрашиваем пол пользователя
     await message_or_callback.answer("Ваш пол?", reply_markup=markup)
 
 
-@dp.callback_query_handler(
-    lambda c: c.data in ["male", "female"], state=Questionnaire.Gender
-)
+@dp.callback_query_handler(lambda c: c.data in ["male", "female"], state=Questionnaire.Gender)
 async def handle_gender(callback_query: types.CallbackQuery, state: FSMContext):
     gender_choice = callback_query.data
     await state.update_data(gender=gender_choice)
+    
+    # Переходим к следующему вопросу о возрасте
+    await Questionnaire.Age.set()
+    await user_age(callback_query.message, state)
+
+
+@dp.message_handler(state=Questionnaire.Age)
+async def user_age(message_or_callback: types.Message, state: FSMContext):
+    logging.info("Inside user_age handler")
+
+    markup = InlineKeyboardMarkup()
+    markup.row(InlineKeyboardButton("Меньше 18 лет", callback_data="age_less_18"))
+    markup.row(InlineKeyboardButton("18-35 лет", callback_data="age_18_35"))
+    markup.row(InlineKeyboardButton("Старше 35 лет", callback_data="age_more_35"))
+    
+    # Спрашиваем возраст пользователя
+    await message_or_callback.answer("Ваш возраст?", reply_markup=markup)
+
+
+# Вопросы исключительно для детей
+# ---------------------------------------------
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["age_less_18"], state=Questionnaire.Age
+)
+async def handle_child(callback_query: types.CallbackQuery, state: FSMContext):
+    age_less_18_choice = callback_query.data
+    await state.update_data(age=age_less_18_choice)
+    await Questionnaire.VegConsumptionChild.set()
+    await veg_consumption_child(callback_query, state)
+
+async def veg_consumption_child(callback_query: types.CallbackQuery, state: FSMContext):
+    markup = InlineKeyboardMarkup()
+    markup.row(child_buttons["veg_child_yes"], child_buttons["veg_child_no"])
+    question_child_text = child_questions.get("q_1", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_child_text,
+        reply_markup=markup,
+    )
+
+
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["veg_child_yes", "veg_child_no"], state=Questionnaire.VegConsumptionChild
+)
+async def seafood_child(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"veg_consumption_child": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.SeafoodConsumptionChild.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(child_buttons["seafood_child_yes"], child_buttons["seafood_child_no"])
+    question_child_text = child_questions.get("q_2", "Вопрос не найден")
+    await callback_query.message.answer(question_child_text, reply_markup=markup)
+
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["seafood_child_yes", "seafood_child_no"],
+    state=Questionnaire.SeafoodConsumptionChild,
+)
+async def memorybad_child(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"seafood_child": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.MemoryIssuesChild.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(child_buttons["memorybad_child_often"], child_buttons["memorybad_child_time_to_time"], child_buttons["memorybad_child_rarely"])
+    question_child_text = child_questions.get("q_3", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_child_text,
+        reply_markup=markup,
+    )
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["memorybad_child_often", "memorybad_child_time_to_time", "memorybad_child_rarely"],
+    state=Questionnaire.MemoryIssuesChild,
+)
+async def screentime_child(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"memorybad_child": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.ScreenTimeChild.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(child_buttons["screentime_child_often"], child_buttons["screentime_child_rarely"])
+    question_child_text = child_questions.get("q_4", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_child_text,
+        reply_markup=markup,
+    )
+
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["screentime_child_often", "screentime_child_rarely"],
+    state=Questionnaire.ScreenTimeChild,
+)
+async def activesport_child(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"screentime_child": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.ActiveSportChild.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(child_buttons["activesport_child_yes"], child_buttons["activesport_child_no"])
+    question_child_text = child_questions.get("q_5", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_child_text,
+        reply_markup=markup,
+    )
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["activesport_child_yes", "activesport_child_no"],
+    state=Questionnaire.ActiveSportChild,
+)
+async def parametr_child(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"activesport_child": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.ParametrChild.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(child_buttons["parametr_child_norm"], child_buttons["parametr_child_underweight"], child_buttons["parametr_child_overweight"])
+    question_child_text = child_questions.get("q_6", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_child_text,
+        reply_markup=markup,
+    )
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["parametr_child_norm", "parametr_child_underweight", "parametr_child_overweight"],
+    state=Questionnaire.ParametrChild,
+)
+async def stomach_child(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"parametr_child": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.StomachChild.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(child_buttons["stomach_child_often"], child_buttons["stomach_child_rarely"])
+    question_child_text = child_questions.get("q_7", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_child_text,
+        reply_markup=markup,
+    )
+
+@dp.callback_query_handler(
+    lambda c: c.data in ["stomach_child_often", "stomach_child_rarely"],
+    state=Questionnaire.StomachChild,
+)
+async def child_conscious_response(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"stomach_child": callback_query.data}) 
+    await state.update_data(answers=current_answers)
+    await Questionnaire.ConsciousResponse.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(buttons["conscious_yes"], buttons["conscious_no"])
+    question_text = question_pack.get("q_18", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_text,
+        reply_markup=markup,
+    )
+
+
+# ---------------------------------------------
+# Вопросы для взрослых
+
+@dp.callback_query_handler(lambda c: c.data.startswith("age_"), state=Questionnaire.Age)
+async def handle_age(callback_query: types.CallbackQuery, state: FSMContext):
+    age_choice = callback_query.data
+    await state.update_data(age=age_choice)
     await Questionnaire.VegConsumption.set()
     await veg_consumption(callback_query, state)
 
 
-async def veg_consumption(message: types.Message, state: FSMContext):
+async def veg_consumption(callback_query: types.CallbackQuery, state: FSMContext):
     markup = InlineKeyboardMarkup()
     markup.row(buttons["veg_yes"], buttons["veg_no"])
     question_text = question_pack.get("q_1", "Вопрос не найден")
-    await message.answer(
+    await callback_query.message.answer(
         question_text,
         reply_markup=markup,
     )
+
 
 
 @dp.callback_query_handler(
@@ -379,6 +536,25 @@ async def male_symptoms(callback_query: types.CallbackQuery, state: FSMContext):
     )
 
 
+@dp.callback_query_handler(
+    lambda c: c.data in ["male_symptoms_yes", "male_symptoms_no"],
+    state=Questionnaire.MaleSymptoms,
+)
+async def man_conscious_response(callback_query: types.CallbackQuery, state: FSMContext):
+    current_data = await state.get_data()
+    current_answers = current_data.get("answers", {})
+    current_answers.update({"male_symptoms": callback_query.data})
+    await state.update_data(answers=current_answers)
+    await Questionnaire.ConsciousResponse.set()
+    markup = InlineKeyboardMarkup()
+    markup.row(buttons["conscious_yes"], buttons["conscious_no"])
+    question_text = question_pack.get("q_18", "Вопрос не найден")
+    await callback_query.message.answer(
+        question_text,
+        reply_markup=markup,
+    )
+
+
 async def reproductive_support(callback_query: types.CallbackQuery, state: FSMContext):
     current_data = await state.get_data()
     current_answers = current_data.get("answers", {})
@@ -417,10 +593,10 @@ async def beauty_enhancement(callback_query: types.CallbackQuery, state: FSMCont
     lambda c: c.data in ["beauty_yes", "beauty_no"],
     state=Questionnaire.BeautyEnhancement,
 )
-async def conscious_response(callback_query: types.CallbackQuery, state: FSMContext):
+async def woman_conscious_response(callback_query: types.CallbackQuery, state: FSMContext):
     current_data = await state.get_data()
     current_answers = current_data.get("answers", {})
-    current_answers.update({"beauty_enhancement": callback_query.data})
+    current_answers.update({"beauty_enhancement": callback_query.data}) 
     await state.update_data(answers=current_answers)
     await Questionnaire.ConsciousResponse.set()
     markup = InlineKeyboardMarkup()
@@ -430,6 +606,7 @@ async def conscious_response(callback_query: types.CallbackQuery, state: FSMCont
         question_text,
         reply_markup=markup,
     )
+
 
 
 @dp.callback_query_handler(
@@ -477,8 +654,9 @@ async def process_final_question(
             user_id,
             user_data.get("name"),
             user_data.get("phone_number"),
-            user_data.get("age"),
             user_data.get("gender"),
+            user_data.get("age"),
+            user_data.get("child_answers"),
             user_data.get("answers"),
             recommended_baas,
         )

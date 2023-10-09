@@ -70,6 +70,25 @@ buttons = {
     "male_symptoms_no": InlineKeyboardButton("Нет", callback_data="male_symptoms_no"),
 }
 
+child_buttons = {
+    "veg_child_yes": InlineKeyboardButton("Да, ест много фруктов и овощей", callback_data="veg_child_yes"),
+    "veg_child_no": InlineKeyboardButton("Нет, редко", callback_data="veg_child_no"),
+    "seafood_child_yes": InlineKeyboardButton("Да, регулярно", callback_data="seafood_child_yes"),
+    "seafood_child_no": InlineKeyboardButton("Нет, редко или почти никогда", callback_data="seafood_child_no"),
+    "memorybad_child_often": InlineKeyboardButton("Часто", callback_data="memorybad_child_often"),
+    "memorybad_child_time_to_time": InlineKeyboardButton("Время от времени", callback_data="memorybad_child_time_to_time"),
+    "memorybad_child_rarely": InlineKeyboardButton("Редко", callback_data="memorybad_child_rarely"),
+    "screentime_child_often": InlineKeyboardButton("Да, часто", callback_data="screentime_child_often"),
+    "screentime_child_rarely": InlineKeyboardButton("Редко", callback_data="screentime_child_rarely"),
+    "activesport_child_yes": InlineKeyboardButton("Да", callback_data="activesport_child_yes"),
+    "activesport_child_no": InlineKeyboardButton("Нет", callback_data="activesport_child_no"),
+    "parametr_child_norm": InlineKeyboardButton("В пределах нормы для возраста и пола", callback_data="parametr_child_norm"),
+    "parametr_child_underweight": InlineKeyboardButton("Недостаточный вес", callback_data="parametr_child_underweight"),
+    "parametr_child_overweight": InlineKeyboardButton("Избыточный вес или ожирение", callback_data="parametr_child_overweight"),
+    "stomach_child_often": InlineKeyboardButton("Часто", callback_data="stomach_child_often"),
+    "stomach_child_rarely": InlineKeyboardButton("Редко", callback_data="stomach_child_rarely"),
+}
+
 
 restart_and_view_kb = InlineKeyboardMarkup(row_width=2)
 restart_and_view_kb.add(

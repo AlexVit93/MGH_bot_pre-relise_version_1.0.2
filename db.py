@@ -3,12 +3,18 @@ import os
 from docs import generate_and_upload
 import logging
 import json
-from utils import question_mapping, answer_mapping
+from utils import question_mapping, child_mapping, answer_mapping, child_answer_mapping, gender_mapping
 
 
 async def create_pool():
     DATABASE_URL = os.environ.get("DATABASE_URL")
     return await asyncpg.create_pool(DATABASE_URL, ssl="require")
+    #     return await asyncpg.create_pool(
+    #     user="postgres",
+    #     password="1234",
+    #     database="postgres",
+    #     host="localhost",
+    # )
 
 
 async def create_table(conn):
@@ -18,8 +24,9 @@ async def create_table(conn):
         user_id SERIAL PRIMARY KEY,
         name VARCHAR(100),
         phone_number BIGINT,
+        gender VARCHAR(50),
         age VARCHAR(30),
-        gender VARCHAR(50),  
+        child_answers JSONB,  
         answers JSONB,
         recommendations JSONB
     );
@@ -29,19 +36,37 @@ async def create_table(conn):
 
 def transform_answers(answers):
     readable_answers = {}
+    readable_child_answers = {}
     for key, value in answers.items():
-        question = question_mapping[key]
-        answer = answer_mapping[value]
-        readable_answers[question] = answer
-    return readable_answers
+        # Проверяем, является ли ключ частью "взрослых" вопросов
+        if key in question_mapping:
+            question = question_mapping[key]
+            answer = answer_mapping[value]
+            readable_answers[question] = answer
+        
+        # Проверяем, является ли ключ частью "детских" вопросов
+        elif key in child_mapping:
+            child_qs = child_mapping[key]
+            child_an = child_answer_mapping[value]
+            readable_child_answers[child_qs] = child_an
+        
+        # Ловим случай, если ключ не найден ни в одном словаре
+        else:
+            print(f"Warning: key {key} not found in either mapping.")
+        
+    return readable_answers, readable_child_answers
+
 
 
 async def save_user_data(
-    conn, user_id, name, phone_number, age, gender, answers, recommendations
+    conn, user_id, name, phone_number, gender, age, child_answers, answers, recommendations
 ):
     logging.info(f"Saving data for user {user_id}...")
-    readable_answers = transform_answers(answers)
-    json_answers = json.dumps(readable_answers)
+    gender = gender_mapping.get(gender, "Неизвестно")
+    readable_answers, readable_child_answers = transform_answers(answers)
+    all_answers = {**readable_answers, **readable_child_answers}
+    json_child_answers = json.dumps(child_answers)  # Преобразуем детские ответы в JSON
+    json_answers = json.dumps(all_answers)
     json_recommendations = json.dumps(recommendations)
 
     try:
@@ -53,21 +78,23 @@ async def save_user_data(
     try:
         result = await conn.execute(
             """
-            INSERT INTO new_users (user_id, name, phone_number, age, gender, answers, recommendations)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO new_users (user_id, name, phone_number, gender, age, child_answers, answers, recommendations)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             ON CONFLICT (user_id) DO UPDATE
             SET name = EXCLUDED.name,
                 phone_number = EXCLUDED.phone_number,
+                gender = EXCLUDED.gender,
                 age = EXCLUDED.age,
-                gender = EXCLUDED.gender,  
+                child_answers = EXCLUDED.child_answers,  -- Обновлено  
                 answers = EXCLUDED.answers,
                 recommendations = EXCLUDED.recommendations;
             """,
             user_id,
             name,
             phone_number,
-            age,
             gender,
+            age,
+            json_child_answers,
             json_answers,
             json_recommendations,
         )
@@ -80,8 +107,9 @@ async def save_user_data(
         "user_id": user_id,
         "name": name,
         "phone_number": phone_number,
-        "age": age,
         "gender": gender,
+        "age": age,
+        "child_answers": readable_child_answers,
         "answers": readable_answers,
         "recommendations": recommendations,
     }
