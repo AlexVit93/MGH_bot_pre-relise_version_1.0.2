@@ -13,5 +13,5 @@ baa_list = [
     "🍃Vito Multix",
     "🍤Vito Fishix",
     "🦴ArtroMarine",
+    "🐟MH Fishix"
 ]
-

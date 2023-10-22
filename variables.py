@@ -1,7 +1,6 @@
 from text import baa_list
 import random
 
-
 def get_recommended_baas(user_data):
     recommended_baas = []
     age_range = user_data.get("age")
@@ -18,51 +17,50 @@ def get_recommended_baas(user_data):
                     "🥕Caroten",
                     "🍃Spirulina",
                     "🍃Chlorella",
+                    "🐟MH Fishix"
                 ]
             )
         elif age_range[0] == 35:
             recommended_baas.extend(["🍃Ashitaba", "🦪Squalene"])
 
     if user_data.get("veg_consumption_child") == "veg_child_yes":
-        recommended_baas.extend(["🌿Zostera"])
+        recommended_baas.extend(["🥕Caroten"])
     else:
-        recommended_baas.extend(["🍃Vito Multix", "🍤Vito Fishix", "🌿IodiumKelp"])
+        recommended_baas.extend(["🍃Spirulina"])
 
-    if user_data.get("seafood_child") == "seafood_child_yes":
-        recommended_baas.extend(["🌿Zostera"])
-    else:
-        recommended_baas.extend(["🌿IodiumKelp", "🍤Vito Fishix"])
+    if user_data.get("seafood_child") == "seafood_child_no":
+        recommended_baas.extend(["🐟MH Fishix", "🌿IodiumKelp"])
     
     if user_data.get("memorybad_child") == "memorybad_child_often":
-        recommended_baas.extend(["🌿IodiumKelp", "🍤Vito Fishix"])
+        recommended_baas.extend(["🐟MH Fishix", "🌿IodiumKelp"])
     elif user_data.get("memorybad_child") == "memorybad_child_time_to_time":
-        recommended_baas.extend(["🍃Vito Multix"])
+        recommended_baas.extend(["🐟MH Fishix", "🌿IodiumKelp"])
     else:
         recommended_baas.extend(["🍃Spirulina"])
     
     if user_data.get("screentime_child") == "screentime_child_often":
-        recommended_baas.extend(["🥕Caroten", "🍤Vito Fishix"])
+        recommended_baas.extend(["🥕Caroten"])
     else:
         recommended_baas.extend(["🍃Spirulina"])
 
     
     if user_data.get("activesport_child") == "activesport_child_yes":
-        recommended_baas.extend(["🍃Spirulina", "🍃Vito Multix" ])
+        recommended_baas.extend(["🍃Spirulina"])
     else:
-        recommended_baas.extend(["🍤Vito Fishix", "🌿IodiumKelp"])
+        recommended_baas.extend(["🌿IodiumKelp"])
 
 
     if user_data.get("parametr_child") == "parametr_child_norm":
-        recommended_baas.extend(["🍃Vito Multix", "🍤Vito Fishix", "🌿IodiumKelp"])
+        recommended_baas.extend(["🌿IodiumKelp"])
     elif user_data.get("parametr_child") == "parametr_child_underweight":
-        recommended_baas.extend(["🍃Spirulina", "🌿IodiumKelp"])
+        recommended_baas.extend(["🍃Spirulina", "🌿IodiumKelp", "🐟MH Fishix"])
     else:
-        recommended_baas.extend(["🍃Vito Multix", "🍤Vito Fishix", "🌿IodiumKelp"])
+        recommended_baas.extend(["🌿IodiumKelp"])
 
     if user_data.get("stomach_child") == "stomach_child_often":
-        recommended_baas.extend(["🍃Vito Multix"])
+        recommended_baas.extend(["🌿IodiumKelp"])
     else:
-        recommended_baas.extend(["🌿IodiumKelp", "🥕Caroten", "🦪Squalene"])
+        recommended_baas.extend(["🌿IodiumKelp", "🥕Caroten"])
 
 
 
@@ -145,7 +143,7 @@ def get_recommended_baas(user_data):
 
     # Желание сохранить молодость:
     if user_data.get("youthfulness") == "yes":
-        recommended_baas.extend(["🍃Ashitaba", "🦪Squalene", "🍃Spirulina"])
+        recommended_baas.extend(["🍃Ashitaba", "🦪Squalene"])
 
     # Потребность в детоксикации:
     if user_data.get("detox") == "yes":
@@ -208,4 +206,3 @@ def get_recommended_baas(user_data):
             recommended_baas.append(baa)
 
     return recommended_baas
-
