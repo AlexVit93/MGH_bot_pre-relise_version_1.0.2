@@ -8,6 +8,7 @@ from variables import get_recommended_baas
 from questions import question_pack, child_questions
 from kb import buttons, child_buttons, restart_and_view_kb
 from db import save_user_data, get_user_data
+from spec_rec import middle_and_old, youngest
 
 
 @dp.message_handler(lambda message: message.text == "Начать", state="*")
@@ -661,13 +662,31 @@ async def process_final_question(
             recommended_baas,
         )
 
+
+    # await state.finish()
+
+    # await callback_query.message.answer(
+    #     f"Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: {', '.join(recommended_baas)}\n\nЕсли желаете перезапустить опрос - нажмите на кнопку \"Перезапуск\", если желаете посмотреть ваши рекомендации - нажмите на кнопку \"Мои БАДы\".",
+    #     reply_markup=restart_and_view_kb,
+    # )
+    await callback_query.message.answer(
+        f"Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: {', '.join(recommended_baas)}",
+    )
+
+    # Рекомендации по возрасту
+    user_age = user_data.get("age")
+    if user_age == "age_less_18":
+        await callback_query.message.answer('\n\n'.join(youngest.values()))
+    elif user_age in ["age_18_35", "age_more_35"]:
+        await callback_query.message.answer('\n\n'.join(middle_and_old.values()))
+
+
     await state.finish()
 
     await callback_query.message.answer(
-        f"Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: {', '.join(recommended_baas)}\n\nЕсли желаете перезапустить опрос - нажмите на кнопку \"Перезапуск\", если желаете посмотреть ваши рекомендации - нажмите на кнопку \"Мои БАДы\".",
+        "Если желаете перезапустить опрос - нажмите на кнопку \"Перезапуск\", если желаете посмотреть ваши рекомендации - нажмите на кнопку \"Мои БАДы\".",
         reply_markup=restart_and_view_kb,
     )
-
 
 @dp.callback_query_handler(lambda c: c.data == "restart_bot")
 async def restart_bot(callback_query: types.CallbackQuery):
