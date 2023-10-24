@@ -1,4 +1,5 @@
 import re
+import ast
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from main import dp, logging
@@ -701,9 +702,15 @@ async def view_recommendations(callback_query: types.CallbackQuery):
         user_data = await get_user_data(conn, user_id)
 
     if user_data and user_data.get("recommendations"):
-        await callback_query.message.answer(
-            f"Ваши последние рекомендации: {' '.join(user_data['recommendations'])}"
-        )
+        # await callback_query.message.answer(
+        #     f"Ваши последние рекомендации: {', '.join(user_data['recommendations'])}"
+        # )
+        # Преобразование строки в список
+        recommendations_list = ast.literal_eval(user_data['recommendations'])
+        # Форматирование списка без кавычек и скобок
+        recommendations_text = ",\n".join(recommendations_list)
+        await callback_query.message.answer(f"Ваши последние рекомендации:\n{recommendations_text}")
+
     else:
         await callback_query.message.answer(
             "У вас пока нет никаких рекомендаций, нажмите /start и пройдите опрос!"
