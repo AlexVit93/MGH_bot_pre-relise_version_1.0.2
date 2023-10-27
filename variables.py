@@ -1,201 +1,140 @@
-from text import baa_list
+from text import baa_list, child_baa_list
 import random
 
 def get_recommended_baas(user_data):
     recommended_baas = []
+
+    # Берем возрастной диапазон
     age_range = user_data.get("age")
-    if age_range:
-        if age_range[0] == 0:
-            recommended_baas.extend(["🌿IodiumKelp", "🍃Spirulina"])
-        elif age_range[0] == 18:
-            recommended_baas.extend(
-                [
-                    "🦪Squalene",
-                    "🍤CardioMarine",
-                    "🌿IodiumKelp",
-                    "🍃Ashitaba",
-                    "🥕Caroten",
-                    "🍃Spirulina",
-                    "🍃Chlorella",
-                    "🐟MH Fishix"
-                ]
-            )
-        elif age_range[0] == 35:
-            recommended_baas.extend(["🍃Ashitaba", "🦪Squalene"])
+    age_baa_mapping = {
+        "age_less_18": child_baa_list,
+        "age_18_35": baa_list,
+        "age_more_35": ["🍃Ashitaba", "🦪Squalene"]
+    }
+    recommended_baas.extend(age_baa_mapping.get(age_range, []))
 
-    if user_data.get("veg_consumption_child") == "veg_child_yes":
-        recommended_baas.extend(["🥕Caroten"])
-    else:
-        recommended_baas.extend(["🍃Spirulina"])
+    # Рекомендации на основе ответов для детей
+    child_answers_mapping = {
+        "veg_consumption_child": {
+            "veg_child_yes": ["🥕Caroten"],
+            "veg_child_no": ["🍃Spirulina"]
+        },
+        "seafood_child": {
+            "seafood_child_no": ["🐟MH Fishix", "🌿IodiumKelp"]
+        },
+        "memorybad_child": {
+            "memorybad_child_often": ["🐟MH Fishix", "🌿IodiumKelp"],
+            "memorybad_child_time_to_time": ["🐟MH Fishix", "🌿IodiumKelp"],
+            "memorybad_child_no": ["🍃Spirulina"]
+        },
+        "screentime_child": {
+            "screentime_child_often": ["🥕Caroten"],
+            "screentime_child_no": ["🍃Spirulina"]
+        },
+        "activesport_child": {
+            "activesport_child_yes": ["🍃Spirulina"],
+            "activesport_child_no": ["🌿IodiumKelp"]
+        },
+        "parametr_child": {
+            "parametr_child_norm": ["🌿IodiumKelp"],
+            "parametr_child_underweight": ["🍃Spirulina", "🌿IodiumKelp", "🐟MH Fishix"],
+            "parametr_child_overweight": ["🌿IodiumKelp"]
+        },
+        "stomach_child": {
+            "stomach_child_often": ["🌿IodiumKelp"],
+            "stomach_child_no": ["🌿IodiumKelp", "🥕Caroten"]
+        }
+    }
 
-    if user_data.get("seafood_child") == "seafood_child_no":
-        recommended_baas.extend(["🐟MH Fishix", "🌿IodiumKelp"])
-    
-    if user_data.get("memorybad_child") == "memorybad_child_often":
-        recommended_baas.extend(["🐟MH Fishix", "🌿IodiumKelp"])
-    elif user_data.get("memorybad_child") == "memorybad_child_time_to_time":
-        recommended_baas.extend(["🐟MH Fishix", "🌿IodiumKelp"])
-    else:
-        recommended_baas.extend(["🍃Spirulina"])
-    
-    if user_data.get("screentime_child") == "screentime_child_often":
-        recommended_baas.extend(["🥕Caroten"])
-    else:
-        recommended_baas.extend(["🍃Spirulina"])
+    for question, answers in child_answers_mapping.items():
+        answer = user_data.get(question)
+        recommended_baas.extend(answers.get(answer, []))
 
-    
-    if user_data.get("activesport_child") == "activesport_child_yes":
-        recommended_baas.extend(["🍃Spirulina"])
-    else:
-        recommended_baas.extend(["🌿IodiumKelp"])
+    # Рекомендации на основе остальных взрослых ответов
+    adult_answers_mapping = {
+        "veg_consumption": {
+            "often": ["🌿Zostera"],
+            "rarely": ["🍃Spirulina", "🍃Ashitaba", "🌿Zostera"]
+        },
+        "fatigue_feeling": {
+            "often": ["🦪Squalene", "🍤CardioMarine", "🌊VitaMarine A", "🌊VitaMarine B", "🌿IodiumKelp"],
+            "rarely": ["🍃Ashitaba", "🥕Caroten"]
+        },
+	    "seafood_consumption": {
+            "often": ["🍃Ashitaba"],
+            "rarely": ["🌊VitaMarine A", "🌊VitaMarine B", "🌿IodiumKelp", "🍃Spirulina", "🍃Chlorella",
+            "🦪Squalene",]
+        },
+	    "memory_issues":{
+            "often": ["🍤CardioMarine", "🌊VitaMarine B", "🌿IodiumKelp"],
+            "sometimes": ["🍤CardioMarine", "🌊VitaMarine B", "🌿IodiumKelp"],
+            "rarely": ["🍃Spirulina", "🍃Chlorella"]
+        },
+	    "vision_problems":{
+            "yes": ["🥕Caroten", "🌊VitaMarine B"],
+            "no": ["🌿IodiumKelp"]
+        },
+	    "screen_time":{
+            "often": ["🥕Caroten", "🌊VitaMarine B"],
+            "rarely": ["🍃Ashitaba"]
 
+        },
+	    "joint_mobility":{
+            "yes": ["🍤ArtroMarine", "🦪Squalene"],
+            "no": ["🍃Chlorella"]
+        },
+	    "active_sport":{
+            "yes": ["🍤ArtroMarine", "🍃Spirulina", "🦪Squalene"],
+            "no": ["🍃Chlorella"]
+        },
+	    "numbness":{
+            "often": ["🍤CardioMarine"],
+            "rarely": ["🍃Chlorella"]
+        },
+	    "headaches":{
+            "often": ["🍤CardioMarine", "🌊VitaMarine A"],
+            "rarely": ["🥕Caroten"]
+        },
+	    "youthfulness":{
+            "yes": ["🍃Ashitaba", "🦪Squalene"]
+        },
+	    "detox":{
+            "yes": ["🍃Ashitaba", "🍃Chlorella", "🌿Zostera"],
+            "no": ["🌊VitaMarine A", "🌊VitaMarine B", "🍃Spirulina", "🌿IodiumKelp", "🥕Caroten"]
+        },
+	    "digestion":{
+            "yes": ["🍃Ashitaba", "🌿Zostera", "🍃Chlorella"],
+            "no": ["🌊VitaMarine A", "🌊VitaMarine B",
+                "🍃Spirulina", "🌿IodiumKelp",
+                "🥕Caroten", "🦪Squalene",]
+        },
+	    "reproductive_support":{
+            "repro_support_yes": ["🌿IodiumKelp"],
+            "repro_support_no": ["🍃Ashitaba", "🍃Chlorella", "🌿Zostera", "🦪Squalene"]
+        },
+	    "beauty_enhancement":{
+            "beauty_yes": ["🍤CardioMarine", "🍤ArtroMarine", "🦪Squalene"],
+            "beauty_no": ["🍃Ashitaba", "🍃Chlorella", "🍃Spirulina", "🌿IodiumKelp"]
+        },
+	    "male_support":{
+            "male_support_yes":["🍤CardioMarine", "🌊VitaMarine A"],
+            "male_support_no": ["🍃Ashitaba", "🦪Squalene"]
+        },
+	    "male_symptoms":{
+            "male_symptoms_yes": ["🍤CardioMarine", "🌊VitaMarine A"],
+            "male_symptoms_no": ["🍃Ashitaba", "🦪Squalene"]
+        }
 
-    if user_data.get("parametr_child") == "parametr_child_norm":
-        recommended_baas.extend(["🌿IodiumKelp"])
-    elif user_data.get("parametr_child") == "parametr_child_underweight":
-        recommended_baas.extend(["🍃Spirulina", "🌿IodiumKelp", "🐟MH Fishix"])
-    else:
-        recommended_baas.extend(["🌿IodiumKelp"])
+    }
 
-    if user_data.get("stomach_child") == "stomach_child_often":
-        recommended_baas.extend(["🌿IodiumKelp"])
-    else:
-        recommended_baas.extend(["🌿IodiumKelp", "🥕Caroten"])
+    for question, answers in adult_answers_mapping.items():
+        answer = user_data.get(question)
+        recommended_baas.extend(answers.get(answer, []))
 
-
-
-
-
-    # Рекомендации на основе остальных ответов:
-    if user_data.get("veg_consumption") == "often":
-        recommended_baas.append("🌿Zostera")
-    elif user_data.get("veg_consumption") == "rarely":
-        recommended_baas.extend(["🍃Spirulina", "🍃Ashitaba", "🌿Zostera"])
-
-    if user_data.get("fatigue_feeling") == "often":
-        recommended_baas.extend(
-            [
-                "🦪Squalene",
-                "🍤CardioMarine",
-                "🌊VitaMarine A",
-                "🌊VitaMarine B",
-                "🌿IodiumKelp",
-            ]
-        )
-    elif user_data.get("fatigue_feeling") == "rarely":
-        recommended_baas.extend(["🍃Ashitaba", "🥕Caroten"])
-
-    if user_data.get("seafood_consumption") == "often":
-        recommended_baas.append("🍃Ashitaba")
-    elif user_data.get("seafood_consumption") == "rarely":
-        recommended_baas.extend(
-            [
-                "🌊VitaMarine A",
-                "🌊VitaMarine B",
-                "🌿IodiumKelp",
-                "🍃Spirulina",
-                "🍃Chlorella",
-                "🦪Squalene",
-            ]
-        )
-    if user_data.get("memory_issues") == "often":
-        recommended_baas.extend(["🍤CardioMarine", "🌊VitaMarine B", "🌿IodiumKelp"])
-    elif user_data.get("memory_issues") == "sometimes":
-        recommended_baas.extend(["🍤CardioMarine", "🌊VitaMarine B", "🌿IodiumKelp"])
-    else:
-        recommended_baas.extend(["🍃Spirulina", "🍃Chlorella"])
-
-    # Проблемы со зрением:
-    if user_data.get("vision_problems") == "yes":
-        recommended_baas.extend(["🥕Caroten", "🌊VitaMarine B"])
-    else:
-        recommended_baas.append("🌿IodiumKelp")
-
-    # Проведение времени перед экранами:
-    if user_data.get("screen_time") == "often":
-        recommended_baas.extend(["🥕Caroten", "🌊VitaMarine B"])
-    else:
-        recommended_baas.append("🍃Ashitaba")
-
-    # Проблемы с суставами:
-    if user_data.get("joint_mobility") == "yes":
-        recommended_baas.extend(["🍤ArtroMarine", "🦪Squalene"])
-    else:
-        recommended_baas.append("🍃Chlorella")
-
-    # Активный спорт:
-    if user_data.get("active_sport") == "yes":
-        recommended_baas.extend(["🍤ArtroMarine", "🍃Spirulina", "🦪Squalene"])
-    else:
-        recommended_baas.append("🍃Chlorella")
-
-    # Онемение и покалывания:
-    if user_data.get("numbness") == "often":
-        recommended_baas.append("🍤CardioMarine")
-    else:
-        recommended_baas.append("🍃Chlorella")
-
-    # Головные боли:
-    if user_data.get("headaches") == "often":
-        recommended_baas.extend(["🍤CardioMarine", "🌊VitaMarine A"])
-    else:
-        recommended_baas.append("🥕Caroten")
-
-    # Желание сохранить молодость:
-    if user_data.get("youthfulness") == "yes":
-        recommended_baas.extend(["🍃Ashitaba", "🦪Squalene"])
-
-    # Потребность в детоксикации:
-    if user_data.get("detox") == "yes":
-        recommended_baas.extend(["🍃Ashitaba", "🍃Chlorella", "🌿Zostera"])
-    else:
-        recommended_baas.extend(
-            ["🌊VitaMarine A", "🌊VitaMarine B", "🍃Spirulina", "🌿IodiumKelp", "🥕Caroten"]
-        )
-
-    # Проблемы с пищеварением:
-    if user_data.get("digestion") == "yes":
-        recommended_baas.extend(["🍃Ashitaba", "🌿Zostera", "🍃Chlorella"])
-    else:
-        recommended_baas.extend(
-            [
-                "🌊VitaMarine A",
-                "🌊VitaMarine B",
-                "🍃Spirulina",
-                "🌿IodiumKelp",
-                "🥕Caroten",
-                "🦪Squalene",
-            ]
-        )
-
-    # Поддержка репродуктивной системы:
-    if user_data.get("reproductive_support") == "repro_support_yes":
-        recommended_baas.append("🌿IodiumKelp")
-    else:
-        recommended_baas.extend(["🍃Ashitaba", "🍃Chlorella", "🌿Zostera", "🦪Squalene"])
-
-    # Поддержка красоты:
-    if user_data.get("beauty_enhancement") == "beauty_yes":
-        recommended_baas.extend(["🍤CardioMarine", "🍤ArtroMarine", "🦪Squalene"])
-    else:
-        recommended_baas.extend(
-            ["🍃Ashitaba", "🍃Chlorella", "🍃Spirulina", "🌿IodiumKelp"]
-        )
-
-        # Поддержка мужского здоровья:
-    if user_data.get("male_support") == "male_support_yes":
-        recommended_baas.append(["🍤CardioMarine", "🌊VitaMarine A"])
-    else:
-        recommended_baas.extend(["🍃Ashitaba", "🦪Squalene"])
-
-    # Есть ли симптомы бессоницы со стороны мужчин:
-    if user_data.get("male_symptoms") == "male_symptoms_yes":
-        recommended_baas.extend(["🍤CardioMarine", "🌊VitaMarine A"])
-    else:
-        recommended_baas.extend(["🍃Ashitaba", "🦪Squalene"])
-
+    # Убираем дубликаты
     recommended_baas = list(set(recommended_baas))
-    # Если рекомендованных бадов больше 3, выбираем рандомно 3 из них
+
+    # Выбираем рандомно 3 рекомендованных бада, если их больше 3
     if len(recommended_baas) > 3:
         recommended_baas = random.sample(recommended_baas, 3)
 

@@ -15,3 +15,11 @@ baa_list = [
     "🦴ArtroMarine",
     "🐟MH Fishix"
 ]
+
+
+child_baa_list = [
+    "🌿IodiumKelp",
+    "🥕Caroten",
+    "🍃Spirulina",
+    "🐟MH Fishix"
+]

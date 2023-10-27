@@ -664,15 +664,9 @@ async def process_final_question(
         )
 
 
-    # await state.finish()
+    message_final = "Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: \n{}".format(',\n'.join(recommended_baas))
+    await callback_query.message.answer(message_final)
 
-    # await callback_query.message.answer(
-    #     f"Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: {', '.join(recommended_baas)}\n\nЕсли желаете перезапустить опрос - нажмите на кнопку \"Перезапуск\", если желаете посмотреть ваши рекомендации - нажмите на кнопку \"Мои БАДы\".",
-    #     reply_markup=restart_and_view_kb,
-    # )
-    await callback_query.message.answer(
-        f"Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: {', '.join(recommended_baas)}",
-    )
 
     # Рекомендации по возрасту
     user_age = user_data.get("age")
@@ -702,9 +696,6 @@ async def view_recommendations(callback_query: types.CallbackQuery):
         user_data = await get_user_data(conn, user_id)
 
     if user_data and user_data.get("recommendations"):
-        # await callback_query.message.answer(
-        #     f"Ваши последние рекомендации: {', '.join(user_data['recommendations'])}"
-        # )
         # Преобразование строки в список
         recommendations_list = ast.literal_eval(user_data['recommendations'])
         # Форматирование списка без кавычек и скобок
