@@ -72,7 +72,6 @@ async def user_age(message_or_callback: types.Message, state: FSMContext):
 
 
 # Вопросы исключительно для детей
-# ---------------------------------------------
 
 @dp.callback_query_handler(
     lambda c: c.data in ["age_less_18"], state=Questionnaire.Age
@@ -91,8 +90,6 @@ async def veg_consumption_child(callback_query: types.CallbackQuery, state: FSMC
         question_child_text,
         reply_markup=markup,
     )
-
-
 
 @dp.callback_query_handler(
     lambda c: c.data in ["veg_child_yes", "veg_child_no"], state=Questionnaire.VegConsumptionChild
@@ -218,8 +215,6 @@ async def child_conscious_response(callback_query: types.CallbackQuery, state: F
         reply_markup=markup,
     )
 
-
-# ---------------------------------------------
 # Вопросы для взрослых
 
 @dp.callback_query_handler(lambda c: c.data.startswith("age_"), state=Questionnaire.Age)
@@ -238,8 +233,6 @@ async def veg_consumption(callback_query: types.CallbackQuery, state: FSMContext
         question_text,
         reply_markup=markup,
     )
-
-
 
 @dp.callback_query_handler(
     lambda c: c.data in ["veg_yes", "veg_no"], state=Questionnaire.VegConsumption
@@ -274,7 +267,6 @@ async def seafood_consumption(callback_query: types.CallbackQuery, state: FSMCon
         reply_markup=markup,
     )
 
-
 @dp.callback_query_handler(
     lambda c: c.data in ["seafood_yes", "seafood_no"],
     state=Questionnaire.SeafoodConsumption,
@@ -295,7 +287,6 @@ async def memory_issues(callback_query: types.CallbackQuery, state: FSMContext):
         reply_markup=markup,
     )
 
-
 @dp.callback_query_handler(
     lambda c: c.data in ["memory_often", "memory_sometimes", "memory_rarely"],
     state=Questionnaire.MemoryIssues,
@@ -313,7 +304,6 @@ async def screen_time(callback_query: types.CallbackQuery, state: FSMContext):
         question_text,
         reply_markup=markup,
     )
-
 
 @dp.callback_query_handler(
     lambda c: c.data in ["screen_often", "screen_rarely"],
@@ -333,7 +323,6 @@ async def vision_problems(callback_query: types.CallbackQuery, state: FSMContext
         reply_markup=markup,
     )
 
-
 @dp.callback_query_handler(
     lambda c: c.data in ["vision_yes", "vision_no"], state=Questionnaire.VisionProblems
 )
@@ -351,7 +340,6 @@ async def joint_mobility(callback_query: types.CallbackQuery, state: FSMContext)
         reply_markup=markup,
     )
 
-
 @dp.callback_query_handler(
     lambda c: c.data in ["joints_yes", "joints_no"], state=Questionnaire.JointMobility
 )
@@ -365,7 +353,6 @@ async def active_sport(callback_query: types.CallbackQuery, state: FSMContext):
     markup.row(buttons["sport_yes"], buttons["sport_no"])
     question_text = question_pack.get("q_8", "Вопрос не найден")
     await callback_query.message.answer(question_text, reply_markup=markup)
-
 
 @dp.callback_query_handler(
     lambda c: c.data in ["sport_yes", "sport_no"], state=Questionnaire.ActiveSport
@@ -383,7 +370,6 @@ async def numbness(callback_query: types.CallbackQuery, state: FSMContext):
         question_text,
         reply_markup=markup,
     )
-
 
 @dp.callback_query_handler(
     lambda c: c.data in ["numbness_often", "numbness_rarely"],
@@ -403,7 +389,6 @@ async def headaches(callback_query: types.CallbackQuery, state: FSMContext):
         reply_markup=markup,
     )
 
-
 @dp.callback_query_handler(
     lambda c: c.data in ["headaches_often", "headaches_rarely"],
     state=Questionnaire.Headaches,
@@ -418,7 +403,6 @@ async def youthfulness(callback_query: types.CallbackQuery, state: FSMContext):
     markup.row(buttons["youthfulness_yes"], buttons["youthfulness_no"])
     question_text = question_pack.get("q_11", "Вопрос не найден")
     await callback_query.message.answer(question_text, reply_markup=markup)
-
 
 @dp.callback_query_handler(
     lambda c: c.data in ["youthfulness_yes", "youthfulness_no"],
@@ -438,7 +422,6 @@ async def detox(callback_query: types.CallbackQuery, state: FSMContext):
         reply_markup=markup,
     )
 
-
 @dp.callback_query_handler(
     lambda c: c.data in ["detox_yes", "detox_no"], state=Questionnaire.Detox
 )
@@ -447,9 +430,7 @@ async def digestion(callback_query: types.CallbackQuery, state: FSMContext):
     current_answers = current_data.get("answers", {})
     current_answers.update({"detox": callback_query.data})
     await state.update_data(answers=current_answers)
-
     await Questionnaire.Digestion.set()
-
     markup = InlineKeyboardMarkup()
     markup.row(buttons["digestion_yes"], buttons["digestion_no"])
     question_text = question_pack.get("q_13", "Вопрос не найден")
@@ -469,10 +450,7 @@ async def transition_to_gender_specific_question(
     current_answers = current_data.get("answers", {})
     current_answers.update({"digestion": callback_query.data})
     await state.update_data(answers=current_answers)
-
-    # Получите пол пользователя из state.
     user_gender = current_data.get("gender")
-
     if user_gender == "male":
         await Questionnaire.MaleSupport.set()
         markup = InlineKeyboardMarkup()
@@ -484,17 +462,15 @@ async def transition_to_gender_specific_question(
         markup.row(buttons["repro_support_yes"], buttons["repro_support_no"])
         question_text = question_pack.get("q_14", "Вопрос не найден")
     else:
-        # Обработка случая, когда пол не установлен или установлен не верно
         await callback_query.message.answer(
             "Произошла ошибка, попробуйте начать заново."
         )
-        return  # Прерываем дальнейшую обработку
-
+        return  
+    
     await callback_query.message.answer(
         question_text,
         reply_markup=markup,
     )
-
 
 async def male_support(callback_query: types.CallbackQuery, state: FSMContext):
     current_data = await state.get_data()
@@ -509,7 +485,6 @@ async def male_support(callback_query: types.CallbackQuery, state: FSMContext):
         question_text,
         reply_markup=markup,
     )
-
 
 @dp.callback_query_handler(
     lambda c: c.data in ["male_support_yes", "male_support_no"],
@@ -529,7 +504,6 @@ async def male_symptoms(callback_query: types.CallbackQuery, state: FSMContext):
         reply_markup=markup,
     )
 
-
 @dp.callback_query_handler(
     lambda c: c.data in ["male_symptoms_yes", "male_symptoms_no"],
     state=Questionnaire.MaleSymptoms,
@@ -548,7 +522,6 @@ async def man_conscious_response(callback_query: types.CallbackQuery, state: FSM
         reply_markup=markup,
     )
 
-
 async def reproductive_support(callback_query: types.CallbackQuery, state: FSMContext):
     current_data = await state.get_data()
     current_answers = current_data.get("answers", {})
@@ -562,7 +535,6 @@ async def reproductive_support(callback_query: types.CallbackQuery, state: FSMCo
         question_text,
         reply_markup=markup,
     )
-
 
 @dp.callback_query_handler(
     lambda c: c.data in ["repro_support_yes", "repro_support_no"],
@@ -582,7 +554,6 @@ async def beauty_enhancement(callback_query: types.CallbackQuery, state: FSMCont
         reply_markup=markup,
     )
 
-
 @dp.callback_query_handler(
     lambda c: c.data in ["beauty_yes", "beauty_no"],
     state=Questionnaire.BeautyEnhancement,
@@ -601,8 +572,6 @@ async def woman_conscious_response(callback_query: types.CallbackQuery, state: F
         reply_markup=markup,
     )
 
-
-
 @dp.callback_query_handler(
     lambda c: c.data in ["conscious_yes", "conscious_no"],
     state=Questionnaire.ConsciousResponse,
@@ -620,7 +589,6 @@ async def ready_response(callback_query: types.CallbackQuery, state: FSMContext)
         question_text,
         reply_markup=markup,
     )
-
 
 @dp.callback_query_handler(
     lambda c: c.data in ["ready_yes", "ready_no"],
@@ -656,10 +624,8 @@ async def process_final_question(
             recommended_baas,
         )
 
-
     message_final = "Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: \n{}".format(',\n'.join(recommended_baas))
     await callback_query.message.answer(message_final)
-
 
     # Рекомендации по возрасту
     user_age = user_data.get("age")
@@ -681,20 +647,15 @@ async def restart_bot(callback_query: types.CallbackQuery):
     await callback_query.answer(callback_query.id)
     await user_name(callback_query.message)
 
-
 @dp.callback_query_handler(lambda c: c.data == "view_recommendations")
 async def view_recommendations(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     async with dp["db_pool"].acquire() as conn:
         user_data = await get_user_data(conn, user_id)
-
     if user_data and user_data.get("recommendations"):
-        # Преобразование строки в список
         recommendations_list = ast.literal_eval(user_data['recommendations'])
-        # Форматирование списка без кавычек и скобок
         recommendations_text = ",\n".join(recommendations_list)
         await callback_query.message.answer(f"Ваши последние рекомендации:\n{recommendations_text}")
-
     else:
         await callback_query.message.answer(
             "У вас пока нет никаких рекомендаций, нажмите /start и пройдите опрос!"

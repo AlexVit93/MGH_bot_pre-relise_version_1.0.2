@@ -7,14 +7,14 @@ from utils import question_mapping, child_mapping, answer_mapping, child_answer_
 
 
 async def create_pool():
-    # DATABASE_URL = os.environ.get("DATABASE_URL")
-    # return await asyncpg.create_pool(DATABASE_URL, ssl="require")
-        return await asyncpg.create_pool(
-        user="postgres",
-        password="1234",
-        database="postgres",
-        host="localhost",
-    )
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    return await asyncpg.create_pool(DATABASE_URL, ssl="require")
+    #     return await asyncpg.create_pool(
+    #     user="postgres",
+    #     password="1234",
+    #     database="postgres",
+    #     host="localhost",
+    # )
 
 
 async def create_table(conn):
@@ -38,19 +38,19 @@ def transform_answers(answers):
     readable_answers = {}
     readable_child_answers = {}
     for key, value in answers.items():
-        # Проверяем, является ли ключ частью "взрослых" вопросов
+        
         if key in question_mapping:
             question = question_mapping[key]
             answer = answer_mapping[value]
             readable_answers[question] = answer
         
-        # Проверяем, является ли ключ частью "детских" вопросов
+        
         elif key in child_mapping:
             child_qs = child_mapping[key]
             child_an = child_answer_mapping[value]
             readable_child_answers[child_qs] = child_an
         
-        # Ловим случай, если ключ не найден ни в одном словаре
+        
         else:
             print(f"Warning: key {key} not found in either mapping.")
         

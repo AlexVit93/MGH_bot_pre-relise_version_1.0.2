@@ -1,18 +1,22 @@
-from text import baa_list, child_baa_list
+from text import baa_list, child_baa_list, baa_weights, child_baa_weights, old_baa_list, old_baa_weights
 import random
 
 def get_recommended_baas(user_data):
     recommended_baas = []
-
-    # Берем возрастной диапазон
+    weighted_baas = []
     age_range = user_data.get("age")
+
     age_baa_mapping = {
-        "age_less_18": ["🌿IodiumKelp", "🍃Spirulina"],
-        "age_18_35": ["🦈Squalene", "❤️CardioMarine", "🌿IodiumKelp", "🍃Ashitaba", "🥕Caroten", "🍃Spirulina",
-    "🍃Chlorella", "🦴ArtroMarine"],
-        "age_more_35": ["🍃Ashitaba", "🦈Squalene", "❤️CardioMarine"]
+        "age_less_18": child_baa_list,
+        "age_18_35": baa_list,
+        "age_more_35": old_baa_list
     }
-    recommended_baas.extend(age_baa_mapping.get(age_range, []))
+
+    weight_mapping = {
+        "age_less_18": child_baa_weights,
+        "age_18_35": baa_weights,
+        "age_more_35": old_baa_weights
+    }
 
     # Рекомендации на основе ответов для детей
     child_answers_mapping = {
@@ -46,10 +50,6 @@ def get_recommended_baas(user_data):
             "stomach_child_no": ["🌿IodiumKelp", "🥕Caroten"]
         }
     }
-
-    for question, answers in child_answers_mapping.items():
-        answer = user_data.get(question)
-        recommended_baas.extend(answers.get(answer, []))
 
     # Рекомендации на основе остальных взрослых ответов
     adult_answers_mapping = {
@@ -129,21 +129,28 @@ def get_recommended_baas(user_data):
 
     }
 
-    for question, answers in adult_answers_mapping.items():
+    current_baas = age_baa_mapping[age_range]
+    current_weights = weight_mapping[age_range]
+    for question, answers in child_answers_mapping.items() if age_range == "age_less_18" else adult_answers_mapping.items():
         answer = user_data.get(question)
-        recommended_baas.extend(answers.get(answer, []))
+        if answer:
+            for baa in answers.get(answer, []):
+                if baa in current_baas:
+                    weighted_baas.extend([baa] * current_weights.get(baa, 1))
 
-    # Убираем дубликаты
-    recommended_baas = list(set(recommended_baas))
+    if not weighted_baas:
+        weighted_baas = current_baas
 
-    # Выбираем рандомно 3 рекомендованных бада, если их больше 3
-    if len(recommended_baas) > 3:
-        recommended_baas = random.sample(recommended_baas, 3)
+    # Убираем дубликаты и выбираем рандомно до 3 рекомендованных БАДов
+    unique_baas = set(weighted_baas)
+    recommended_baas = random.sample(unique_baas, min(3, len(unique_baas)))
 
-    # Если рекомендованных бадов меньше 3, добавляем рандомные, чтобы их стало 3
+    # Если рекомендованных БАДов меньше 3, добавляем рандомные, учитывая веса
     while len(recommended_baas) < 3:
-        baa = random.choice(baa_list)
+        baa = random.choices(list(current_baas), weights=[current_weights.get(b, 1) for b in current_baas])[0]
         if baa not in recommended_baas:
             recommended_baas.append(baa)
 
     return recommended_baas
+
+
