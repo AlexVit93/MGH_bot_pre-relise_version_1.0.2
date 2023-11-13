@@ -5,6 +5,7 @@ def get_recommended_baas(user_data):
     recommended_baas = []
     weighted_baas = []
     age_range = user_data.get("age")
+    user_gender = user_data.get("gender")
 
     age_baa_mapping = {
         "age_less_18": child_baa_list,
@@ -138,8 +139,13 @@ def get_recommended_baas(user_data):
                 if baa in current_baas:
                     weighted_baas.extend([baa] * current_weights.get(baa, 1))
 
+    if user_gender == "male" and age_range in ["age_18_35", "age_more_35"]:
+        weighted_baas.insert(0, "❤️CardioMarine")
+    
     if not weighted_baas:
         weighted_baas = current_baas
+    
+
 
     # Убираем дубликаты и выбираем рандомно до 3 рекомендованных БАДов
     unique_baas = set(weighted_baas)

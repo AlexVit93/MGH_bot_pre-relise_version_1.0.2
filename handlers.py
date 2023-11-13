@@ -608,9 +608,21 @@ async def process_final_question(
 
     user_data = await state.get_data()
     logging.info(f"Data to be saved: {user_data}")
-    recommended_baas = get_recommended_baas(user_data)
-    user_id = callback_query.from_user.id
+    
+    # Рекомендации по возрасту
+    user_age = user_data.get("age")
+    if user_age == "age_less_18":
+        await callback_query.message.answer('\n\n'.join(youngest.values()))
+    elif user_age in ["age_18_35", "age_more_35"]:
+        await callback_query.message.answer('\n\n'.join(middle_and_old.values()))
 
+    # Получение рекомендованных БАДов после рекомендаций по возрасту
+    recommended_baas = get_recommended_baas(user_data)
+    message_final = "Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: \n{}".format(',\n'.join(recommended_baas))
+    await callback_query.message.answer(message_final)
+
+    # Сохранение данных пользователя и рекомендаций в базу данных
+    user_id = callback_query.from_user.id
     async with dp["db_pool"].acquire() as conn:
         await save_user_data(
             conn,
@@ -623,17 +635,6 @@ async def process_final_question(
             user_data.get("answers"),
             recommended_baas,
         )
-
-    message_final = "Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: \n{}".format(',\n'.join(recommended_baas))
-    await callback_query.message.answer(message_final)
-
-    # Рекомендации по возрасту
-    user_age = user_data.get("age")
-    if user_age == "age_less_18":
-        await callback_query.message.answer('\n\n'.join(youngest.values()))
-    elif user_age in ["age_18_35", "age_more_35"]:
-        await callback_query.message.answer('\n\n'.join(middle_and_old.values()))
-
 
     await state.finish()
 

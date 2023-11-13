@@ -93,5 +93,6 @@ child_buttons = {
 restart_and_view_kb = InlineKeyboardMarkup(row_width=2)
 restart_and_view_kb.add(
     InlineKeyboardButton("Перезапуск", callback_data="restart_bot"),
-    InlineKeyboardButton("Мои БАДы", callback_data="view_recommendations"),
+    InlineKeyboardButton("Результат", callback_data="view_recommendations"),
+    InlineKeyboardButton("💊 Мои БАДы", url="https://www.marinehealth.asia/products")
 )
