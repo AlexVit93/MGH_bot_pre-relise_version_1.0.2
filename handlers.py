@@ -1,10 +1,9 @@
-import re
 import ast
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from main import dp, logging
 from states import Questionnaire
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from variables import get_recommended_baas
 from questions import question_pack, child_questions
 from kb import buttons, child_buttons, restart_and_view_kb
@@ -23,25 +22,22 @@ async def user_name(message: types.Message):
 async def phone(message: types.Message, state: FSMContext):
     await Questionnaire.Phone.set()
     await state.update_data(name=message.text)
+    markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    btn_request = KeyboardButton("Отправить мой номер телефона", request_contact=True)
+    markup.add(btn_request)
     await message.answer(
-        "Приятно познакомиться! Введите ваш контактный номер телефона, пожалуйста."
-    )
+        "Приятно познакомиться! Предоставьте ваш контактный номер, пожалуйста",   reply_markup=markup)
 
 
-@dp.message_handler(state=Questionnaire.Phone)
+@dp.message_handler(content_types=["contact"], state=Questionnaire.Phone)
 async def handle_phone(message: types.Message, state: FSMContext):
-    phone_number = message.text
-
-    # Проверка на ввод только чисел
-    if not re.match(r"^\d+$", phone_number):
-        await message.answer("Введите только номер телефона (только цифры)!")
-        return
-
-    await state.update_data(phone_number=phone_number)
-
-    await message.answer("Спасибо, получил ваш номер!")
+    await state.update_data(phone_number=message.contact.phone_number)
+    user_data = await state.get_data()
+    logging.info(f"Phone number saved in state: {user_data['phone_number']}")
+    await message.answer("Спасибо, получил ваш номер!", reply_markup=ReplyKeyboardRemove())
     await Questionnaire.Gender.set()
     await user_gender(message, state)
+
 
 
 @dp.message_handler(state=Questionnaire.Gender)
@@ -50,9 +46,7 @@ async def user_gender(message_or_callback: types.Message, state: FSMContext):
 
     markup = InlineKeyboardMarkup()
     markup.row(InlineKeyboardButton("Мужчина", callback_data="male"))
-    markup.row(InlineKeyboardButton("Женщина", callback_data="female"))
-    
-    # Спрашиваем пол пользователя
+    markup.row(InlineKeyboardButton("Женщина", callback_data="female"))    
     await message_or_callback.answer("Ваш пол?", reply_markup=markup)
 
 
@@ -61,7 +55,6 @@ async def handle_gender(callback_query: types.CallbackQuery, state: FSMContext):
     gender_choice = callback_query.data
     await state.update_data(gender=gender_choice)
     
-    # Переходим к следующему вопросу о возрасте
     await Questionnaire.Age.set()
     await user_age(callback_query.message, state)
 
@@ -75,7 +68,6 @@ async def user_age(message_or_callback: types.Message, state: FSMContext):
     markup.row(InlineKeyboardButton("18-35 лет", callback_data="age_18_35"))
     markup.row(InlineKeyboardButton("Старше 35 лет", callback_data="age_more_35"))
     
-    # Спрашиваем возраст пользователя
     await message_or_callback.answer("Ваш возраст?", reply_markup=markup)
 
 
@@ -647,6 +639,7 @@ async def process_final_question(
     )
 
     user_data = await state.get_data()
+    logging.info(f"Data to be saved: {user_data}")
     recommended_baas = get_recommended_baas(user_data)
     user_id = callback_query.from_user.id
 
