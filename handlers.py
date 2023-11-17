@@ -1,9 +1,11 @@
 import ast
 from aiogram import types
+from aiogram.types import InputFile
 from aiogram.dispatcher import FSMContext
 from main import dp, logging
 from states import Questionnaire
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from aiogram.dispatcher.filters import Regexp
 from variables import get_recommended_baas
 from questions import question_pack, child_questions
 from kb import buttons, child_buttons, restart_and_view_kb
@@ -17,17 +19,44 @@ async def user_name(message: types.Message):
     await Questionnaire.Name.set()
     await message.answer("Ваше имя?")
 
-
 @dp.message_handler(state=Questionnaire.Name)
 async def phone(message: types.Message, state: FSMContext):
-    await Questionnaire.Phone.set()
     await state.update_data(name=message.text)
-    markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    btn_request = KeyboardButton("Отправить мой номер телефона", request_contact=True)
-    markup.add(btn_request)
-    await message.answer(
-        "Приятно познакомиться! Предоставьте ваш контактный номер, пожалуйста",   reply_markup=markup)
+    await Questionnaire.Phone.set()
+    markup = InlineKeyboardMarkup()
+    btn_share = InlineKeyboardButton("Поделиться контактом", callback_data="share_contact")
+    markup.add(btn_share)
+    await message.answer("Приятно познакомиться! Для того, чтобы продолжить, мне нужен ваш контактный номер.", reply_markup=markup)
 
+@dp.callback_query_handler(lambda c: c.data == "share_contact", state=Questionnaire.Phone)
+async def prompt_share_contact(callback_query: types.CallbackQuery):
+    alert_text = "Для коммуникации нам нужно получить ваш контакт. Если вы не увидели кнопку, то найдите у себя иконку с четырьмя кружочками в скругленной рамке, как показано на фото и нажмите на неё."
+    await callback_query.answer(alert_text, show_alert=True)
+    instruction_image = './img/instruction.png'
+    photo = InputFile(instruction_image)
+    await callback_query.message.answer_photo(photo=photo)
+    markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    button_phone = KeyboardButton(text="Отправить мой номер телефона", request_contact=True)
+    markup.add(button_phone)
+    await callback_query.message.answer("Нажмите кнопку ниже, чтобы отправить ваш контакт.", reply_markup=markup)
+
+@dp.message_handler(Regexp(r'^\+?\d{10,15}$'), state=Questionnaire.Phone)
+async def handle_wrong_phone_input(message: types.Message):
+    await message.reply("К сожалению, ручной ввод номера не поддерживается. Пожалуйста, используйте кнопку 'Отправить мой номер телефона', чтобы продолжить.",
+                        reply_markup=ReplyKeyboardMarkup(
+                            [[KeyboardButton("Отправить мой номер телефона", request_contact=True)]],
+                            resize_keyboard=True,
+                            one_time_keyboard=True
+                        ))
+
+@dp.message_handler(state=Questionnaire.Phone)
+async def handle_any_text_input(message: types.Message):
+    await message.reply("Пожалуйста, используйте кнопку 'Отправить мой номер телефона', чтобы продолжить.",
+                        reply_markup=ReplyKeyboardMarkup(
+                            [[KeyboardButton("Отправить мой номер телефона", request_contact=True)]],
+                            resize_keyboard=True,
+                            one_time_keyboard=True
+                        ))
 
 @dp.message_handler(content_types=["contact"], state=Questionnaire.Phone)
 async def handle_phone(message: types.Message, state: FSMContext):
