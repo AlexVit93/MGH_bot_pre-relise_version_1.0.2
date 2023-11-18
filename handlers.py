@@ -1,4 +1,5 @@
 import ast
+import asyncio
 from aiogram import types
 from aiogram.types import InputFile
 from aiogram.dispatcher import FSMContext
@@ -647,6 +648,7 @@ async def process_final_question(
 
     # Получение рекомендованных БАДов после рекомендаций по возрасту
     recommended_baas = get_recommended_baas(user_data)
+    await asyncio.sleep(2.5)
     message_final = "Спасибо за ответы! На их основе мы рекомендуем следующие БАДы: \n{}".format(',\n'.join(recommended_baas))
     await callback_query.message.answer(message_final)
 
@@ -666,7 +668,7 @@ async def process_final_question(
         )
 
     await state.finish()
-
+    await asyncio.sleep(1.5)
     await callback_query.message.answer(
         "Если желаете перезапустить опрос - нажмите на кнопку \"Перезапуск\", если желаете посмотреть ваши рекомендации - нажмите на кнопку \"Мои БАДы\".",
         reply_markup=restart_and_view_kb,
