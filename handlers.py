@@ -33,7 +33,7 @@ async def phone(message: types.Message, state: FSMContext):
 async def prompt_share_contact(callback_query: types.CallbackQuery):
     alert_text = "Для коммуникации нам нужно получить ваш контакт. Если вы не увидели кнопку, то найдите у себя иконку с четырьмя кружочками в скругленной рамке, как показано на фото и нажмите на неё."
     await callback_query.answer(alert_text, show_alert=True)
-    instruction_image = './img/instruction.png'
+    instruction_image = './img/instr.png'
     photo = InputFile(instruction_image)
     await callback_query.message.answer_photo(photo=photo)
     markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
