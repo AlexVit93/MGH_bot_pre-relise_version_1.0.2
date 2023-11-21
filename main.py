@@ -1,11 +1,11 @@
+import os
 import logging
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.utils import executor
 # from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
-from config import API_TOKEN, REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD
-
+from config import API_TOKEN
 from db import create_pool
 from db import create_table
 
@@ -15,14 +15,9 @@ logging.basicConfig(level=logging.INFO)
 
 # Инициализация бота и диспетчера
 bot = Bot(token=API_TOKEN)
+redis_url = os.environ.get("REDIS_URL")
 # storage = MemoryStorage()
-storage = RedisStorage2(
-    host=REDIS_HOST, 
-    port=REDIS_PORT,
-    db=REDIS_DB,
-    password=REDIS_PASSWORD,
-    
-)
+storage = RedisStorage2(redis_url)
 dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 
