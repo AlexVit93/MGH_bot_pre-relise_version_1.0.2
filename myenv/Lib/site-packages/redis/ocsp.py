@@ -15,7 +15,6 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.hashes import SHA1, Hash
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from cryptography.x509 import ocsp
-
 from redis.exceptions import AuthorizationError, ConnectionError
 
 
@@ -189,8 +188,8 @@ class OCSPVerifier:
         return cert
 
     def components_from_socket(self):
-        """This function returns the certificate, primary issuer, and primary ocsp server
-        in the chain for a socket already wrapped with ssl.
+        """This function returns the certificate, primary issuer, and primary ocsp
+        server in the chain for a socket already wrapped with ssl.
         """
 
         # convert the binary certifcate to text
@@ -292,7 +291,7 @@ class OCSPVerifier:
         This first retrieves for validate the certificate, issuer_url,
         and ocsp_server for certificate validate. Then retrieves the
         issuer certificate from the issuer_url, and finally checks
-        the valididy of OCSP revocation status.
+        the validity of OCSP revocation status.
         """
 
         # validate the certificate
