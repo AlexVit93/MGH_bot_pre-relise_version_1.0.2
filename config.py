@@ -6,5 +6,7 @@
 
 API_TOKEN = "6779195353:AAEI9Mxbyo--Xb8Z4NT-V6yFabcHknt7Wbc"
 
-
-
+REDISHOST = "monorail.proxy.rlwy.net"
+REDISPORT = "34400"
+REDISUSER = "default"
+REDISPASSWORD = "L5lKb6i1Pho6M2bK6DKN64hMGGbpidip"
