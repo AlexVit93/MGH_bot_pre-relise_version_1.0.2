@@ -7,14 +7,14 @@ from utils import question_mapping, child_mapping, answer_mapping, child_answer_
 
 
 async def create_pool():
-    DATABASE_URL = os.environ.get("DATABASE_URL")
-    return await asyncpg.create_pool(DATABASE_URL, ssl="require")
-    #     return await asyncpg.create_pool(
-    #     user="postgres",
-    #     password="1234",
-    #     database="postgres",
-    #     host="localhost",
-    # )
+    # DATABASE_URL = os.environ.get("DATABASE_URL")
+    # return await asyncpg.create_pool(DATABASE_URL, ssl="require")
+        return await asyncpg.create_pool(
+        user="postgres",
+        password="1234",
+        database="postgres",
+        host="localhost",
+    )
 
 
 async def create_table(conn):
