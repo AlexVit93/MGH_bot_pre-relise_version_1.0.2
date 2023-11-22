@@ -17,7 +17,9 @@ from spec_rec import middle_and_old, youngest
 @dp.message_handler(lambda message: message.text == "Начать", state="*")
 @dp.message_handler(commands="start", state="*")
 async def user_name(message: types.Message):
+    logging.info(f"Setting state to Name for user {message.from_user.id}")
     await Questionnaire.Name.set()
+    logging.info(f"State set to Name for user {message.from_user.id}")
     await message.answer("Ваше имя?")
 
 @dp.message_handler(state=Questionnaire.Name)
